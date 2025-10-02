@@ -108,12 +108,12 @@
             <select name="id_commune" id="commune" required>
                 <option value="">-- Sélectionnez une commune --</option>
                 <?php
-                // Exemple de remplissage avec la table commune
-                // require_once '../db.php';
-                // $req = $pdo->query("SELECT id_commune, ville FROM commune");
-                // while($row = $req->fetch()) {
-                //     echo "<option value='{$row['id_commune']}'>{$row['ville']}</option>";
-                // }
+                //Exemple de remplissage avec la table commune
+                 require_once '../db.php';
+                $req = $pdo->query("SELECT id_commune, ville FROM commune");
+                 while($row = $req->fetch()) {
+                     echo "<option value='{$row['id_commune']}'>{$row['ville']}</option>";
+                 }
                 ?>
             </select>
         </div>
