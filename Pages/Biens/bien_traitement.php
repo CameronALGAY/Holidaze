@@ -1,5 +1,6 @@
 <?php
 
+include_once '../include/db.php';
 include 'bien_class.php';
 
 class Bien

@@ -1,6 +1,7 @@
 <?php
 
-include 'locataire_class.php';
+include_once '../include/db.php';
+include_once 'locataire_class.php';
 
 class Locataire
 {
