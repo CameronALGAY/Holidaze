@@ -1,5 +1,7 @@
 <?php
 
+include_once '../Communes/communes_class.php';
+include_once '../TypeBien/typebien_class.php';
 class Bien
 {
     private $idBien;
@@ -11,13 +13,13 @@ class Bien
     private $animauxBien;
     private $nbCouchagesBien;
     private $id_commune;
-    private $idTypeBien;
+    private $id_typebien;
 
     // Attributs supplémentaires pour les jointures
     private $nomProprietaire;
     private $prenomProprietaire;
 
-    function __construct($idBien, $nomBien, $descriptionBien, $rueBien, $compBien, $superficieBien, $animauxBien, $nbCouchagesBien, $id_commune, $idTypeBien)
+    function __construct($idBien, $nomBien, $descriptionBien, $rueBien, $compBien, $superficieBien, $animauxBien, $nbCouchagesBien, $id_commune, $id_typebien)
 
     {
         $this->idBien = $idBien;
@@ -29,7 +31,7 @@ class Bien
         $this->animauxBien = $animauxBien;
         $this->nbCouchagesBien = $nbCouchagesBien;
         $this->id_commune = $id_commune;
-        $this->idTypeBien = $idTypeBien;
+        $this->id_typebien = $id_typebien;
     }
 
     // GETTERS & SETTERS
@@ -71,7 +73,7 @@ class Bien
     }
     public function getIdTypeBien()
     {
-        return $this->idTypeBien;
+        return $this->id_typebien;
     }
 
     public function setNomBien($nomBien)
