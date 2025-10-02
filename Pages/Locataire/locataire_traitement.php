@@ -3,7 +3,10 @@ require_once '../../includes/db.php';
 require_once 'locataire_class.php';
 require_once '../Communes/communes_class.php';
 
-class LocataireController
+include_once '../include/db.php';
+include_once 'locataire_class.php';
+
+class Locataire
 {
     private $pdo;
 
