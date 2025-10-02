@@ -92,7 +92,7 @@ class Locataire
 
 // --- Gestion des requêtes AJAX ---
 if (isset($_GET['action'])) {
-    $controller = new LocataireController($pdo);
+    $controller = new Locataire($pdo);
 
     switch ($_GET['action']) {
         case 'getAll':
