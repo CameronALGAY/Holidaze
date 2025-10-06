@@ -155,8 +155,7 @@ if (isset($_GET['action'])) {
             } else {
                 header('Location: typebien_from.php?error=2');
                 exit;
-            }
-            break;
+            }         
 
         default:
             echo json_encode(['success' => false, 'message' => 'Action non reconnue']);
