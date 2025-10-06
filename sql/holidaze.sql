@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : 127.0.0.1
--- Généré le : jeu. 02 oct. 2025 à 10:43
+-- Généré le : jeu. 02 oct. 2025 à 08:31
 -- Version du serveur : 10.4.32-MariaDB
 -- Version de PHP : 8.2.12
 
@@ -47,7 +47,7 @@ CREATE TABLE `bien` (
 --
 
 CREATE TABLE `commune` (
-  `id_commune` int(11) NOT NULL,
+  `id_commune` mediumint(8) UNSIGNED NOT NULL,
   `commune_departement` varchar(3) DEFAULT NULL,
   `commune_slug` varchar(255) DEFAULT NULL,
   `nom_commune` varchar(45) DEFAULT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE `commune` (
   `commune_latitude_dms` varchar(8) DEFAULT NULL,
   `commune_zmin` mediumint(4) DEFAULT NULL,
   `commune_zmax` mediumint(4) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 --
 -- Déchargement des données de la table `commune`
@@ -37021,18 +37021,6 @@ CREATE TABLE `saison` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `secompose`
---
-
-CREATE TABLE `secompose` (
-  `id_bien` int(11) NOT NULL,
-  `id_prestation` int(11) NOT NULL,
-  `quantite` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `tarif`
 --
 
@@ -37064,9 +37052,7 @@ CREATE TABLE `type_bien` (
 -- Index pour la table `bien`
 --
 ALTER TABLE `bien`
-  ADD PRIMARY KEY (`id_bien`),
-  ADD KEY `id_commune` (`id_commune`),
-  ADD KEY `id_typebien` (`id_typebien`);
+  ADD PRIMARY KEY (`id_bien`);
 
 --
 -- Index pour la table `commune`
@@ -37090,15 +37076,13 @@ ALTER TABLE `commune`
 -- Index pour la table `locataire`
 --
 ALTER TABLE `locataire`
-  ADD PRIMARY KEY (`id_locataire`),
-  ADD KEY `id_commune` (`id_commune`);
+  ADD PRIMARY KEY (`id_locataire`);
 
 --
 -- Index pour la table `photo`
 --
 ALTER TABLE `photo`
-  ADD PRIMARY KEY (`id_photo`),
-  ADD KEY `id_bien` (`id_bien`);
+  ADD PRIMARY KEY (`id_photo`);
 
 --
 -- Index pour la table `prestation`
@@ -37110,9 +37094,7 @@ ALTER TABLE `prestation`
 -- Index pour la table `reservation`
 --
 ALTER TABLE `reservation`
-  ADD PRIMARY KEY (`id_reservations`),
-  ADD KEY `id_locataire` (`id_locataire`),
-  ADD KEY `id_bien` (`id_bien`);
+  ADD PRIMARY KEY (`id_reservations`);
 
 --
 -- Index pour la table `saison`
@@ -37121,19 +37103,10 @@ ALTER TABLE `saison`
   ADD PRIMARY KEY (`id_saison`);
 
 --
--- Index pour la table `secompose`
---
-ALTER TABLE `secompose`
-  ADD PRIMARY KEY (`id_bien`,`id_prestation`),
-  ADD KEY `id_prestation` (`id_prestation`);
-
---
 -- Index pour la table `tarif`
 --
 ALTER TABLE `tarif`
-  ADD PRIMARY KEY (`id_tarif`),
-  ADD KEY `id_bien` (`id_bien`),
-  ADD KEY `id_saison` (`id_saison`);
+  ADD PRIMARY KEY (`id_tarif`);
 
 --
 -- Index pour la table `type_bien`
@@ -37155,7 +37128,7 @@ ALTER TABLE `bien`
 -- AUTO_INCREMENT pour la table `commune`
 --
 ALTER TABLE `commune`
-  MODIFY `id_commune` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36831;
+  MODIFY `id_commune` mediumint(8) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36831;
 
 --
 -- AUTO_INCREMENT pour la table `locataire`
@@ -37198,50 +37171,6 @@ ALTER TABLE `tarif`
 --
 ALTER TABLE `type_bien`
   MODIFY `id_typebien` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- Contraintes pour les tables déchargées
---
-
---
--- Contraintes pour la table `bien`
---
-ALTER TABLE `bien`
-  ADD CONSTRAINT `bien_ibfk_1` FOREIGN KEY (`id_commune`) REFERENCES `commune` (`id_commune`),
-  ADD CONSTRAINT `bien_ibfk_2` FOREIGN KEY (`id_typebien`) REFERENCES `type_bien` (`id_typebien`);
-
---
--- Contraintes pour la table `locataire`
---
-ALTER TABLE `locataire`
-  ADD CONSTRAINT `locataire_ibfk_1` FOREIGN KEY (`id_commune`) REFERENCES `commune` (`id_commune`);
-
---
--- Contraintes pour la table `photo`
---
-ALTER TABLE `photo`
-  ADD CONSTRAINT `photo_ibfk_1` FOREIGN KEY (`id_bien`) REFERENCES `bien` (`id_bien`);
-
---
--- Contraintes pour la table `reservation`
---
-ALTER TABLE `reservation`
-  ADD CONSTRAINT `reservation_ibfk_1` FOREIGN KEY (`id_locataire`) REFERENCES `locataire` (`id_locataire`),
-  ADD CONSTRAINT `reservation_ibfk_2` FOREIGN KEY (`id_bien`) REFERENCES `bien` (`id_bien`);
-
---
--- Contraintes pour la table `secompose`
---
-ALTER TABLE `secompose`
-  ADD CONSTRAINT `secompose_ibfk_1` FOREIGN KEY (`id_bien`) REFERENCES `bien` (`id_bien`),
-  ADD CONSTRAINT `secompose_ibfk_2` FOREIGN KEY (`id_prestation`) REFERENCES `prestation` (`id_prestation`);
-
---
--- Contraintes pour la table `tarif`
---
-ALTER TABLE `tarif`
-  ADD CONSTRAINT `tarif_ibfk_1` FOREIGN KEY (`id_bien`) REFERENCES `bien` (`id_bien`),
-  ADD CONSTRAINT `tarif_ibfk_2` FOREIGN KEY (`id_saison`) REFERENCES `saison` (`id_saison`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

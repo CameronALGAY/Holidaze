@@ -1,10 +1,6 @@
 <?php
-require_once '../../includes/db.php';
 require_once 'locataire_class.php';
 require_once '../Communes/communes_class.php';
-
-include_once '../include/db.php';
-include_once 'locataire_class.php';
 
 class Locataire
 {

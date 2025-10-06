@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ajout Locataire</title>
+      <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -66,7 +67,7 @@
 
 <div class="form-container">
     <h2>Ajouter un Locataire</h2>
-    <form action="traitement_locataire.php" method="POST">
+    <form action="locataire_traitement.fr" method="POST">
         
         <div class="form-group">
             <label for="nom">Nom :</label>
@@ -108,12 +109,12 @@
             <select name="id_commune" id="commune" required>
                 <option value="">-- Sélectionnez une commune --</option>
                 <?php
-                //Exemple de remplissage avec la table commune
-                 require_once '../db.php';
-                $req = $pdo->query("SELECT id_commune, ville FROM commune");
-                 while($row = $req->fetch()) {
-                     echo "<option value='{$row['id_commune']}'>{$row['ville']}</option>";
-                 }
+                // Exemple de remplissage avec la table commune
+                // require_once '../db.php';
+                // $req = $pdo->query("SELECT id_commune, ville FROM commune");
+                // while($row = $req->fetch()) {
+                //     echo "<option value='{$row['id_commune']}'>{$row['ville']}</option>";
+                // }
                 ?>
             </select>
         </div>
