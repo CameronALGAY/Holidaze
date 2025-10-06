@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Ajout Locataire</title>
+      <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
