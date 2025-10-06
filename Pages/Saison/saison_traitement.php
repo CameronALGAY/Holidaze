@@ -1,99 +1,103 @@
 <?php
-require_once '../../includes/db.php';
-require_once 'saison_class.php';
+// Empêcher l'affichage des erreurs en HTML
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
 
-class Saison
-{
-    private $pdo;
+// Définir le header JSON dès le début
+header('Content-Type: application/json');
 
-    public function __construct($pdo)
-    {
-        $this->pdo = $pdo;
+try {
+    require_once '../../include/db.php';
+
+    class SaisonController {
+        private $pdo;
+        
+        public function __construct($pdo) { 
+            $this->pdo = $pdo; 
+        }
+
+        public function getAllSaisons() {
+            $stmt = $this->pdo->query("SELECT * FROM saison ORDER BY libelle_saison");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        public function getById($id) {
+            $stmt = $this->pdo->prepare("SELECT * FROM saison WHERE id_saison = ?");
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        public function create($libelle) {
+            $stmt = $this->pdo->prepare("INSERT INTO saison (libelle_saison) VALUES (?)");
+            return $stmt->execute([$libelle]);
+        }
+
+        public function update($id, $libelle) {
+            $stmt = $this->pdo->prepare("UPDATE saison SET libelle_saison = ? WHERE id_saison = ?");
+            return $stmt->execute([$libelle, $id]);
+        }
+
+        public function delete($id) {
+            $stmt = $this->pdo->prepare("DELETE FROM saison WHERE id_saison = ?");
+            return $stmt->execute([$id]);
+        }
+
+        public function search($search) {
+            $stmt = $this->pdo->prepare("SELECT * FROM saison WHERE libelle_saison LIKE ? ORDER BY libelle_saison");
+            $stmt->execute(["%$search%"]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
     }
 
-    // Récupérer toutes les saisons
-    public function getAllSaisons()
-    {
-        $stmt = $this->pdo->query("SELECT * FROM saison ORDER BY libelle_saison");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
+    $controller = new SaisonController($pdo);
+    $action = $_REQUEST['action'] ?? '';
 
-    // Récupérer une saison par ID
-    public function getSaisonById($id)
-    {
-        $stmt = $this->pdo->prepare("SELECT * FROM saison WHERE id_saison = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Récupérer une saison par nom
-    public function getByLibelle($libelle)
-    {
-        $stmt = $this->pdo->prepare("SELECT * FROM saison WHERE libelle_saison = ?");
-        $stmt->execute([$libelle]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
-
-    // Créer une nouvelle saison
-    public function createSaison($libelle_saison)
-    {
-        $stmt = $this->pdo->prepare("INSERT INTO saison (libelle_saison) VALUES (?)");
-        return $stmt->execute([$libelle_saison]);
-    }
-
-    // Mettre à jour une saison
-    public function updateSaison($id, $libelle_saison)
-    {
-        $stmt = $this->pdo->prepare("UPDATE saison SET libelle_saison = ? WHERE id_saison = ?");
-        return $stmt->execute([$libelle_saison, $id]);
-    }
-
-    // Supprimer une saison
-    public function deleteSaison($id)
-    {
-        $stmt = $this->pdo->prepare("DELETE FROM saison WHERE id_saison = ?");
-        return $stmt->execute([$id]);
-    }
-
-    // Rechercher des saisons par mot-clé
-    public function searchSaisons($search)
-    {
-        $stmt = $this->pdo->prepare("SELECT * FROM saison WHERE libelle_saison LIKE ? ORDER BY libelle_saison");
-        $stmt->execute(['%' . $search . '%']);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-// --- Gestion des requêtes AJAX ---
-if (isset($_GET['action'])) {
-    $controller = new Saison($pdo);
-
-    switch ($_GET['action']) {
+    switch ($action) {
         case 'getAll':
-            $saisons = $controller->getAllSaisons();
-            echo json_encode($saisons);
+            echo json_encode($controller->getAllSaisons());
             break;
 
         case 'getById':
-            $id = $_GET['id'] ?? 0;
-            $saison = $controller->getSaisonById($id);
-            echo json_encode([
-                'success' => $saison !== false,
-                'saison' => $saison
-            ]);
+            echo json_encode($controller->getById($_GET['id'] ?? 0));
             break;
 
-        case 'getByLibelle':
-            $libelle = $_GET['libelle'] ?? '';
-            $saison = $controller->getByLibelle($libelle);
-            echo json_encode([
-                'success' => $saison !== false,
-                'saison' => $saison
-            ]);
+        case 'create':
+            $libelle = $_POST['libelle_saison'] ?? '';
+            if (empty($libelle)) {
+                echo json_encode(['success' => false, 'message' => 'Le libellé est requis']);
+            } else {
+                echo json_encode(['success' => $controller->create($libelle)]);
+            }
+            break;
+
+        case 'update':
+            $id = $_POST['id'] ?? 0;
+            $libelle = $_POST['libelle_saison'] ?? '';
+            if (empty($libelle)) {
+                echo json_encode(['success' => false, 'message' => 'Le libellé est requis']);
+            } else {
+                echo json_encode(['success' => $controller->update($id, $libelle)]);
+            }
+            break;
+
+        case 'delete':
+            $id = $_POST['id'] ?? 0;
+            echo json_encode(['success' => $controller->delete($id)]);
+            break;
+
+        case 'search':
+            $search = $_GET['search'] ?? '';
+            echo json_encode($controller->search($search));
             break;
 
         default:
             echo json_encode(['success' => false, 'message' => 'Action non reconnue']);
     }
+
+} catch (Exception $e) {
+    // En cas d'erreur, retourner du JSON valide
+    echo json_encode([
+        'success' => false, 
+        'message' => 'Erreur serveur: ' . $e->getMessage()
+    ]);
 }
-?>
