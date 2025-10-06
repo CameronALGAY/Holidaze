@@ -63,7 +63,7 @@ $editType = $editId ? $controller->getTypeBienById($editId) : null;
                   value="<?= htmlspecialchars($editType['des_typebien']) ?>"
                   class="w-full border rounded-lg p-2 focus:ring focus:ring-yellow-300"
                   required>
-                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">💾 Enregistrer</button>
+                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">💾</button>
                 <a href="typebien_form.php" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400">Annuler</a>
               </form>
             <?php else: ?>
