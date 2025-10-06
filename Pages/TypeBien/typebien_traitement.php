@@ -63,11 +63,13 @@ $controller = new TypeBienController($pdo);
 
 // --- Gestion du formulaire POST classique ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $des_typebien = trim($_POST['des_typebien'] ?? '');
 
     if (!empty($des_typebien)) {
         $success = $controller->createTypeBien($des_typebien);
         if ($success) {
+            header('Location: typebien.php?success=1');
             header('Location: typebien.php?success=1');
             exit;
         } else {
