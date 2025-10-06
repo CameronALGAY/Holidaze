@@ -161,3 +161,4 @@ if (isset($_GET['action'])) {
             echo json_encode(['success' => false, 'message' => 'Action non reconnue']);
     }
 }
+
