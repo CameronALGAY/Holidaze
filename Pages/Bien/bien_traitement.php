@@ -1,5 +1,5 @@
 <?php
-require_once '../include/db.php';
+require_once '../../include/db.php';
 require_once 'biens_class.php';
 
 class BiensController
