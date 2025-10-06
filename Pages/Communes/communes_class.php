@@ -35,4 +35,19 @@ class Communes
     {
         return $this->gps_commune;
     }
+
+    // Setters
+
+    public function setNomCommune($nom_commune)
+    {
+        $this->nom_commune = $nom_commune;
+    }
+    public function setCpCommune($cp_commune)
+    {
+        $this->cp_commune = $cp_commune;
+    }
+    public function setGpsCommune($gps_commune)
+    {
+        $this->gps_commune = $gps_commune;
+    }
 }

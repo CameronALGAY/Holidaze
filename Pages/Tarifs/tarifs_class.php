@@ -64,6 +64,8 @@ class Tarifs
         $this->tarif = $tarif;
     }
 
+    
+
     // 🔹 CREATE
     public function create()
     {
@@ -122,6 +124,4 @@ class Tarifs
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }
-
-
 }

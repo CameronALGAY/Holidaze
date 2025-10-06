@@ -16,4 +16,8 @@ class Prestation {
     public function getLibelle() {
         return $this->libelle_prestation;
     }
+
+    public function setLibelle($libelle_prestation) {
+        $this->libelle_prestation = $libelle_prestation;
+    }
 }   
