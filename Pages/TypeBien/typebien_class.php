@@ -8,6 +8,7 @@ class TypeBien
     {
         $this->id_typebien = $id_typebien;
         $this->des_typebien = $des_typebien;
+        $this->des_typebien = $des_typebien;
     }
 
     // --- Getters ---
