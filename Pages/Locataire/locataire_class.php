@@ -1,6 +1,7 @@
 <?php
-require_once '/../../include/db.php';
+require_once __DIR__ . '/../../include/db.php';
 
+if (!class_exists('Locataire')) {
 
 class Locataire
 {
@@ -44,6 +45,7 @@ class Locataire
         $this->raison_social = $raison_social;
         $this->siret = $siret;
     }
+    
 
     // --- Getters ---
     public function getIdLocataire() { return $this->id_locataire; }
@@ -71,5 +73,6 @@ class Locataire
     public function setIdCommune($commune) { $this->id_commune = $commune; }
     public function setRaisonSocial($val) { $this->raison_social = $val; }
     public function setSiret($val) { $this->siret = $val; }
+}
 }
 ?>
