@@ -41,37 +41,82 @@
   </div>
 
   <script>
+    let saisonEditId = null; // ID de la saison en édition
+
     async function loadSaisons(search = "") {
       try {
         let url = "saison_traitement.php?action=" + (search ? "search&search=" + encodeURIComponent(search) : "getAll");
         const res = await fetch(url);
         const data = await res.json();
 
-        // Vérifier si data est un tableau
         if (!Array.isArray(data)) {
-          console.error("Réponse non valide:", data);
           document.getElementById("saisons-list").innerHTML = "<p class='text-red-600'>Erreur: " + (data.message || "Format de réponse invalide") + "</p>";
           return;
         }
 
         let html = "";
         data.forEach(s => {
-          html += `
-            <div class="flex justify-between items-center border-b py-2">
-              <span>${s.libelle_saison}</span>
-              <div>
-                <button onclick="editSaison(${s.id_saison}, '${s.libelle_saison.replace(/'/g, "\\'")}')" 
-                  class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</button>
-                <button onclick="deleteSaison(${s.id_saison})"
-                  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🗑️ Supprimer</button>
+          if (saisonEditId === s.id_saison) {
+            // Affichage du champ texte pour édition
+            html += `
+              <form onsubmit="return saveSaisonEdit(${s.id_saison});" class="flex justify-between items-center border-b py-2 gap-2">
+                <input type="text" id="edit-libelle-${s.id_saison}" value="${s.libelle_saison.replace(/"/g, '&quot;')}"
+                  class="w-full border rounded-lg p-2 focus:ring focus:ring-yellow-300" required>
+                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">💾</button>
+                <button type="button" onclick="cancelSaisonEdit()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400">Annuler</button>
+              </form>
+            `;
+          } else {
+            html += `
+              <div class="flex justify-between items-center border-b py-2">
+                <span>${s.libelle_saison}</span>
+                <div>
+                  <button onclick="startSaisonEdit(${s.id_saison})"
+                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</button>
+                  <button onclick="deleteSaison(${s.id_saison})"
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🗑️ Supprimer</button>
+                </div>
               </div>
-            </div>`;
+            `;
+          }
         });
         document.getElementById("saisons-list").innerHTML = html || "<p>Aucune saison trouvée.</p>";
       } catch (error) {
-        console.error("Erreur lors du chargement:", error);
         document.getElementById("saisons-list").innerHTML = "<p class='text-red-600'>Erreur de chargement. Consultez la console.</p>";
       }
+    }
+
+    function startSaisonEdit(id) {
+      saisonEditId = id;
+      loadSaisons();
+    }
+
+    function cancelSaisonEdit() {
+      saisonEditId = null;
+      loadSaisons();
+    }
+
+    async function saveSaisonEdit(id) {
+      const libelle = document.getElementById("edit-libelle-" + id).value;
+      const formData = new FormData();
+      formData.append("id", id);
+      formData.append("libelle_saison", libelle);
+
+      try {
+        const res = await fetch("saison_traitement.php?action=update", { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("message").innerText = "✅ Saison modifiée.";
+          saisonEditId = null;
+          loadSaisons();
+        } else {
+          document.getElementById("message").innerText = "❌ Erreur: " + (data.message || "Erreur modification");
+        }
+      } catch (error) {
+        document.getElementById("message").innerText = "❌ Erreur de connexion.";
+      }
+      return false; // Empêche la soumission classique du formulaire
     }
 
     // Ajout
@@ -121,31 +166,6 @@
           loadSaisons();
         } else {
           alert("❌ Erreur: " + (data.message || "Erreur suppression"));
-        }
-      } catch (error) {
-        console.error("Erreur:", error);
-        alert("❌ Erreur de connexion");
-      }
-    }
-
-    // Edition (inline)
-    async function editSaison(id, libelle) {
-      const nouveau = prompt("Modifier la saison :", libelle);
-      if (nouveau === null) return;
-
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("libelle_saison", nouveau);
-
-      try {
-        const res = await fetch("saison_traitement.php?action=update", { method: "POST", body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-          document.getElementById("message").innerText = "✅ Saison modifiée.";
-          loadSaisons();
-        } else {
-          alert("❌ Erreur: " + (data.message || "Erreur modification"));
         }
       } catch (error) {
         console.error("Erreur:", error);

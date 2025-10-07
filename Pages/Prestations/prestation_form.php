@@ -41,37 +41,82 @@
   </div>
 
   <script>
+    let prestationEditId = null; // ID de la prestation en édition
+
     async function loadPrestations(search = "") {
       try {
-        let url = "prestation_traitement.php?action=" + (search ? "search&search=" + search : "getAll");
+        let url = "prestation_traitement.php?action=" + (search ? "search&search=" + encodeURIComponent(search) : "getAll");
         const res = await fetch(url);
         const data = await res.json();
 
-        // Vérifier si data est un tableau
         if (!Array.isArray(data)) {
-          console.error("Réponse non valide:", data);
           document.getElementById("prestations-list").innerHTML = "<p class='text-red-600'>Erreur: " + (data.message || "Format de réponse invalide") + "</p>";
           return;
         }
 
         let html = "";
         data.forEach(p => {
-          html += `
-            <div class="flex justify-between items-center border-b py-2">
-              <span>${p.libelle_prestation}</span>
-              <div>
-                <button onclick="editPrestation(${p.id}, '${p.libelle_prestation.replace(/'/g, "\\'")}')" 
-                  class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</button>
-                <button onclick="deletePrestation(${p.id})"
-                  class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🗑️ Supprimer</button>
+          if (prestationEditId === p.id) {
+            // Affichage du champ texte pour édition
+            html += `
+              <form onsubmit="return savePrestationEdit(${p.id});" class="flex justify-between items-center border-b py-2 gap-2">
+                <input type="text" id="edit-libelle-${p.id}" value="${p.libelle_prestation.replace(/"/g, '&quot;')}"
+                  class="w-full border rounded-lg p-2 focus:ring focus:ring-yellow-300" required>
+                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">💾</button>
+                <button type="button" onclick="cancelPrestationEdit()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400">Annuler</button>
+              </form>
+            `;
+          } else {
+            html += `
+              <div class="flex justify-between items-center border-b py-2">
+                <span>${p.libelle_prestation}</span>
+                <div>
+                  <button onclick="startPrestationEdit(${p.id})"
+                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</button>
+                  <button onclick="deletePrestation(${p.id})"
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🗑️ Supprimer</button>
+                </div>
               </div>
-            </div>`;
+            `;
+          }
         });
         document.getElementById("prestations-list").innerHTML = html || "<p>Aucune prestation trouvée.</p>";
       } catch (error) {
-        console.error("Erreur lors du chargement:", error);
         document.getElementById("prestations-list").innerHTML = "<p class='text-red-600'>Erreur de chargement. Consultez la console.</p>";
       }
+    }
+
+    function startPrestationEdit(id) {
+      prestationEditId = id;
+      loadPrestations();
+    }
+
+    function cancelPrestationEdit() {
+      prestationEditId = null;
+      loadPrestations();
+    }
+
+    async function savePrestationEdit(id) {
+      const libelle = document.getElementById("edit-libelle-" + id).value;
+      const formData = new FormData();
+      formData.append("id", id);
+      formData.append("libelle_prestation", libelle);
+
+      try {
+        const res = await fetch("prestation_traitement.php?action=update", { method: "POST", body: formData });
+        const data = await res.json();
+
+        if (data.success) {
+          document.getElementById("message").innerText = "✅ Prestation modifiée.";
+          prestationEditId = null;
+          loadPrestations();
+        } else {
+          document.getElementById("message").innerText = "❌ Erreur: " + (data.message || "Erreur modification");
+        }
+      } catch (error) {
+        document.getElementById("message").innerText = "❌ Erreur de connexion.";
+      }
+      return false; // Empêche la soumission classique du formulaire
     }
 
     // Ajout
@@ -121,31 +166,6 @@
           loadPrestations();
         } else {
           alert("❌ Erreur: " + (data.message || "Erreur suppression"));
-        }
-      } catch (error) {
-        console.error("Erreur:", error);
-        alert("❌ Erreur de connexion");
-      }
-    }
-
-    // Edition (inline)
-    async function editPrestation(id, libelle) {
-      const nouveau = prompt("Modifier la prestation :", libelle);
-      if (nouveau === null) return;
-
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("libelle_prestation", nouveau);
-
-      try {
-        const res = await fetch("prestation_traitement.php?action=update", { method: "POST", body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-          document.getElementById("message").innerText = "✅ Prestation modifiée.";
-          loadPrestations();
-        } else {
-          alert("❌ Erreur: " + (data.message || "Erreur modification"));
         }
       } catch (error) {
         console.error("Erreur:", error);
