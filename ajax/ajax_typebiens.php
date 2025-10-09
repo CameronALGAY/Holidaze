@@ -1,10 +1,12 @@
 <?php
-require_once __DIR__ . '/../include/db.php'; // ✅ même structure que ajax_bien.php
+require_once __DIR__ . '/../include/db.php'; 
 
 header('Content-Type: application/json');
 
-if (isset($_GET['q']) && strlen($_GET['q']) >= 2) {
-    $search = '%' . $_GET['q'] . '%';
+$search = $_GET['search'] ?? '';
+
+if (strlen($search) >= 1) { // tu avais >=2 pour communes, mais >=1 ici pour typebien
+    $searchTerm = '%' . $search . '%';
 
     try {
         $stmt = $pdo->prepare("
@@ -15,12 +17,12 @@ if (isset($_GET['q']) && strlen($_GET['q']) >= 2) {
             LIMIT 20
         ");
         
-        $stmt->execute([$search]);
+        $stmt->execute([$searchTerm]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode([
             'success' => true,
-            'typebiens' => $results
+            'data' => $results
         ]);
     } catch (PDOException $e) {
         echo json_encode([
@@ -31,7 +33,7 @@ if (isset($_GET['q']) && strlen($_GET['q']) >= 2) {
 } else {
     echo json_encode([
         'success' => false,
-        'typebiens' => []
+        'data' => []
     ]);
 }
 ?>
