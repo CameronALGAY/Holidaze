@@ -62,11 +62,7 @@ class TypeBienController
 $controller = new TypeBienController($pdo);
 
 // --- Gestion du formulaire POST classique ---
-<<<<<<< HEAD
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-=======
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_GET['action']) || $_GET['action'] !== 'update')) {
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
     $des_typebien = trim($_POST['des_typebien'] ?? '');
 
     if (!empty($des_typebien)) {
@@ -84,8 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_GET['action']) || $_GET['
     }
 }
 
-<<<<<<< HEAD
-=======
 // --- Gestion du formulaire POST pour la modification ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'update') {
     $id = $_GET['id'] ?? 0;
@@ -105,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['ac
     }
 }
 
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
 // --- Gestion des requêtes AJAX ---
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
@@ -132,8 +125,6 @@ if (isset($_GET['action'])) {
             ]);
             break;
 
-<<<<<<< HEAD
-=======
         case 'delete':
             $id = $_GET['id'] ?? 0;
             if ($id) {
@@ -166,12 +157,7 @@ if (isset($_GET['action'])) {
             }
             break;
 
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
         default:
             echo json_encode(['success' => false, 'message' => 'Action non reconnue']);
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
