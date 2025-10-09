@@ -1,106 +1,37 @@
 <?php
+require_once __DIR__ . '/../include/db.php'; // ✅ même structure que ajax_bien.php
+
 header('Content-Type: application/json');
-require_once '../../includes/db.php';
-require_once '../TypeBien/typebien_traitement.php';
 
-$controller = new TypeBienController($pdo);
-$response = ['success' => false, 'message' => ''];
+if (isset($_GET['q']) && strlen($_GET['q']) >= 2) {
+    $search = '%' . $_GET['q'] . '%';
 
-try {
-    // Gestion des requêtes GET
-    if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-        $action = $_GET['action'] ?? '';
+    try {
+        $stmt = $pdo->prepare("
+            SELECT id_typebien, des_typebien
+            FROM type_bien
+            WHERE des_typebien LIKE ?
+            ORDER BY des_typebien
+            LIMIT 20
+        ");
+        
+        $stmt->execute([$search]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        switch ($action) {
-            case 'getAll':
-                $types = $controller->getAllTypeBien();
-                $response = ['success' => true, 'data' => $types];
-                break;
-
-            case 'getById':
-                $id = $_GET['id'] ?? 0;
-                $type = $controller->getTypeBienById($id);
-                $response = [
-                    'success' => $type !== false,
-                    'data' => $type,
-                    'message' => $type ? '' : 'Type de bien non trouvé'
-                ];
-                break;
-
-            case 'search':
-                $search = $_GET['search'] ?? '';
-                $types = $controller->searchTypeBien($search);
-                $response = ['success' => true, 'data' => $types];
-                break;
-
-            default:
-                $response['message'] = 'Action GET non reconnue';
-        }
+        echo json_encode([
+            'success' => true,
+            'typebiens' => $results
+        ]);
+    } catch (PDOException $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Erreur de recherche'
+        ]);
     }
-
-    // Gestion des requêtes POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $action = $_POST['action'] ?? '';
-
-        switch ($action) {
-            case 'create':
-                $des_typebien = $_POST['des_typebien'] ?? '';
-                
-                if (empty($des_typebien)) {
-                    $response['message'] = 'La description est obligatoire';
-                    break;
-                }
-
-                // Vérifier si le type existe déjà
-                $existing = $controller->getByDescription($des_typebien);
-                if ($existing) {
-                    $response['message'] = 'Ce type de bien existe déjà';
-                    break;
-                }
-
-                $result = $controller->createTypeBien($des_typebien);
-                $response = [
-                    'success' => $result,
-                    'message' => $result ? 'Type de bien créé avec succès' : 'Erreur lors de la création'
-                ];
-                break;
-
-            case 'update':
-                $id = $_POST['id_typebien'] ?? 0;
-                $des_typebien = $_POST['des_typebien'] ?? '';
-
-                if (empty($des_typebien)) {
-                    $response['message'] = 'La description est obligatoire';
-                    break;
-                }
-
-                $result = $controller->updateTypeBien($id, $des_typebien);
-                $response = [
-                    'success' => $result,
-                    'message' => $result ? 'Type de bien modifié avec succès' : 'Erreur lors de la modification'
-                ];
-                break;
-
-            case 'delete':
-                $id = $_POST['id_typebien'] ?? 0;
-                $result = $controller->deleteTypeBien($id);
-                $response = [
-                    'success' => $result,
-                    'message' => $result ? 'Type de bien supprimé avec succès' : 'Erreur lors de la suppression'
-                ];
-                break;
-
-            default:
-                $response['message'] = 'Action POST non reconnue';
-        }
-    }
-
-} catch (Exception $e) {
-    $response = [
+} else {
+    echo json_encode([
         'success' => false,
-        'message' => 'Erreur serveur: ' . $e->getMessage()
-    ];
+        'typebiens' => []
+    ]);
 }
-
-echo json_encode($response);
 ?>

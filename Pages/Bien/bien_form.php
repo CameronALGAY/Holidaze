@@ -44,20 +44,26 @@
         <input type="number" id="nbCouchagesBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
       </div>
       
-      <!-- Champ auto-complétion commune -->
+      <!-- Auto-complétion communes -->
       <div class="relative">
         <label class="block text-gray-700 mb-2">Commune :</label>
         <input type="text" id="communeSearch" autocomplete="off"
                class="w-full border rounded-lg p-2 mb-2 focus:ring focus:ring-blue-300"
                placeholder="Nom de la commune">
         <input type="hidden" id="communeIdInput">
-        <div id="resultsContainer" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 w-full hidden"></div>
+        <div id="communesResults" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 w-full hidden"></div>
       </div>
 
-      <div>
+      <!-- Auto-complétion types de bien -->
+      <div class="relative">
         <label class="block text-gray-700 mb-2">Type de bien :</label>
-        <input type="number" id="id_typebien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300" placeholder="ID type bien">
+        <input type="text" id="typebienSearch" autocomplete="off"
+               class="w-full border rounded-lg p-2 mb-2 focus:ring focus:ring-blue-300"
+               placeholder="Nom du type de bien">
+        <input type="hidden" id="typebienIdInput">
+        <div id="typebienResults" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 w-full hidden"></div>
       </div>
+
       <div class="md:col-span-2">
         <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">
           ➕ Ajouter un bien
@@ -136,7 +142,7 @@
       formData.append("animauxBien", document.getElementById("animauxBien").value);
       formData.append("nbCouchagesBien", document.getElementById("nbCouchagesBien").value);
       formData.append("id_commune", document.getElementById("communeIdInput").value);
-      formData.append("id_typebien", document.getElementById("id_typebien").value);
+      formData.append("id_typebien", document.getElementById("typebienIdInput").value);
 
       try {
         const res = await fetch("bien_traitement.php", { method: "POST", body: formData });
@@ -144,6 +150,8 @@
         if (data.success) {
           document.getElementById("message").innerText = "✅ Nouveau bien créé !";
           document.getElementById("form-create").reset();
+          document.getElementById("communeIdInput").value = "";
+          document.getElementById("typebienIdInput").value = "";
           loadBiens();
         } else {
           document.getElementById("message").innerText = "❌ Erreur: " + (data.message || "Erreur lors de la création.");
@@ -163,60 +171,83 @@
     // --- Auto-complétion communes ---
     const communeSearch = document.getElementById('communeSearch');
     const communeIdInput = document.getElementById('communeIdInput');
-    const resultsContainer = document.getElementById('resultsContainer');
+    const communesResults = document.getElementById('communesResults');
 
     communeSearch.addEventListener('input', function() {
         const query = this.value.trim();
-        if (query.length >= 2) {
-            searchCommunes(query);
-        } else {
-            resultsContainer.classList.add('hidden');
-            resultsContainer.innerHTML = '';
+        if (query.length >= 2) searchCommunes(query);
+        else {
+            communesResults.classList.add('hidden');
+            communesResults.innerHTML = '';
         }
     });
 
     function searchCommunes(query) {
-        resultsContainer.innerHTML = '<div class="p-3 text-center text-gray-600">Recherche en cours...</div>';
-        resultsContainer.classList.remove('hidden');
-
-        fetch(`../../ajax/ajax_commune.php?action=search&search=${encodeURIComponent(query)}`)
-            .then(response => response.json())
+        communesResults.innerHTML = '<div class="p-3 text-center text-gray-600">Recherche en cours...</div>';
+        communesResults.classList.remove('hidden');
+        fetch(`../../ajax/ajax_bien.php?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
             .then(data => {
-                if (data.success && data.data.length > 0) {
-                    displayResults(data.data);
-                } else {
-                    resultsContainer.innerHTML = '<div class="p-3 text-center text-gray-600">Aucune commune trouvée</div>';
-                }
+                if (data.success && data.communes.length > 0) displayCommuneResults(data.communes);
+                else communesResults.innerHTML = '<div class="p-3 text-center text-gray-600">Aucune commune trouvée</div>';
             })
-            .catch(error => {
-                console.error('Erreur:', error);
-                resultsContainer.innerHTML = '<div class="p-3 text-center text-red-600">Erreur de connexion</div>';
-            });
+            .catch(() => communesResults.innerHTML = '<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
     }
 
-    function displayResults(communes) {
-        resultsContainer.innerHTML = '';
-        communes.forEach(commune => {
+    function displayCommuneResults(communes) {
+        communesResults.innerHTML = '';
+        communes.forEach(c => {
             const item = document.createElement('div');
-            item.className = 'autocomplete-item p-2 cursor-pointer hover:bg-blue-100';
-            item.innerHTML = `
-                <div class="font-semibold text-gray-800">${commune.nom_commune}</div>
-                <div class="text-sm text-gray-600">
-                    ${commune.cp_commune ? 'CP: ' + commune.cp_commune : ''}
-                    ${commune.commune_departement ? ' - Dép: ' + commune.commune_departement : ''}
-                </div>
-            `;
-            item.addEventListener('click', () => selectCommune(commune));
-            resultsContainer.appendChild(item);
+            item.className = 'p-2 cursor-pointer hover:bg-blue-100';
+            item.innerHTML = `<div class="font-semibold">${c.nom_commune}</div><div class="text-sm text-gray-600">${c.cp_commune ? 'CP: '+c.cp_commune : ''} ${c.commune_departement ? ' - Dép: '+c.commune_departement : ''}</div>`;
+            item.addEventListener('click', () => {
+                communeSearch.value = c.nom_commune;
+                communeIdInput.value = c.id_commune;
+                communesResults.classList.add('hidden');
+            });
+            communesResults.appendChild(item);
         });
-        resultsContainer.classList.remove('hidden');
     }
 
-    function selectCommune(commune) {
-        communeSearch.value = commune.nom_commune + (commune.cp_commune ? ' (' + commune.cp_commune + ')' : '');
-        communeIdInput.value = commune.id_commune;
-        resultsContainer.classList.add('hidden');
-        resultsContainer.innerHTML = '';
+    // --- Auto-complétion types de bien ---
+    const typeSearch = document.getElementById('typebienSearch');
+    const typeIdInput = document.getElementById('typebienIdInput');
+    const typeResults = document.getElementById('typebienResults');
+
+    typeSearch.addEventListener('input', function() {
+        const query = this.value.trim();
+        if (query.length >= 1) searchTypeBien(query);
+        else {
+            typeResults.classList.add('hidden');
+            typeResults.innerHTML = '';
+        }
+    });
+
+    function searchTypeBien(query) {
+        typeResults.innerHTML = '<div class="p-3 text-center text-gray-600">Recherche en cours...</div>';
+        typeResults.classList.remove('hidden');
+        fetch(`../../ajax/ajax_typebiens.php?action=search&search=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.data.length > 0) displayTypeResults(data.data);
+                else typeResults.innerHTML = '<div class="p-3 text-center text-gray-600">Aucun type trouvé</div>';
+            })
+            .catch(() => typeResults.innerHTML = '<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
+    }
+
+    function displayTypeResults(types) {
+        typeResults.innerHTML = '';
+        types.forEach(t => {
+            const item = document.createElement('div');
+            item.className = 'p-2 cursor-pointer hover:bg-blue-100';
+            item.innerHTML = `<div class="font-semibold">${t.des_typebien}</div>`;
+            item.addEventListener('click', () => {
+                typeSearch.value = t.des_typebien;
+                typeIdInput.value = t.id_typebien;
+                typeResults.classList.add('hidden');
+            });
+            typeResults.appendChild(item);
+        });
     }
 
     // --- Initial load ---

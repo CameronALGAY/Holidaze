@@ -1,6 +1,16 @@
-<?php
-require_once '../../include/db.php';
-require_once 'biens_class.php';
+<<?php
+require_once __DIR__ . '/../../include/db.php';
+require_once 'bien_class.php';
+require_once '../Communes/communes_class.php';
+require_once '../TypeBien/typebien_class.php';
+
+// Vérification de la connexion
+if (!$pdo) {
+    echo json_encode(['success' => false, 'message' => 'Erreur de connexion à la base']);
+    exit;
+}
+
+// ... le reste de ton code BiensController
 
 class BiensController
 {
