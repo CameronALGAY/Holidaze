@@ -14,8 +14,8 @@ class Locataire
     private $pass_locataire;
     private $tel_locataire;
     private $comp_locataire;
-    private $id_commune; // objet Commune
-    private $raison_social;
+    private $id_commune;
+    private $raison_sociale;
     private $siret;
 
     public function __construct(
@@ -29,7 +29,7 @@ class Locataire
         $tel_locataire = "",
         $comp_locataire = "",
         $id_commune = null,
-        $raison_social = "",
+        $raison_sociale = "",
         $siret = ""
     ) {
         $this->id_locataire = $id_locataire;
@@ -41,13 +41,11 @@ class Locataire
         $this->pass_locataire = $pass_locataire;
         $this->tel_locataire = $tel_locataire;
         $this->comp_locataire = $comp_locataire;
-        $this->id_commune = $id_commune; // instance de Commune
-        $this->raison_social = $raison_social;
+        $this->id_commune = $id_commune;
+        $this->raison_sociale = $raison_sociale;
         $this->siret = $siret;
     }
-    
 
-    // --- Getters ---
     public function getIdLocataire() { return $this->id_locataire; }
     public function getNomLocataire() { return $this->nom_locataire; }
     public function getPrenomLocataire() { return $this->prenom_locataire; }
@@ -58,10 +56,9 @@ class Locataire
     public function getTelLocataire() { return $this->tel_locataire; }
     public function getCompLocataire() { return $this->comp_locataire; }
     public function getIdCommune() { return $this->id_commune; }
-    public function getRaisonSocial() { return $this->raison_social; }
+    public function getRaisonSocial() { return $this->raison_sociale; }
     public function getSiret() { return $this->siret; }
 
-    // --- Setters ---
     public function setNomLocataire($val) { $this->nom_locataire = $val; }
     public function setPrenomLocataire($val) { $this->prenom_locataire = $val; }
     public function setDnaLocataire($val) { $this->dna_locataire = $val; }
@@ -71,7 +68,7 @@ class Locataire
     public function setTelLocataire($val) { $this->tel_locataire = $val; }
     public function setCompLocataire($val) { $this->comp_locataire = $val; }
     public function setIdCommune($commune) { $this->id_commune = $commune; }
-    public function setRaisonSocial($val) { $this->raison_social = $val; }
+    public function setRaisonSocial($val) { $this->raison_sociale = $val; }
     public function setSiret($val) { $this->siret = $val; }
 }
 }

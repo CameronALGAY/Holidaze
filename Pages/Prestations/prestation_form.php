@@ -1,180 +1,139 @@
+<?php
+require_once '../../include/db.php';
+require_once 'prestation_class.php';
+require_once 'prestation_traitement.php';
+
+$controller = new PrestationController($pdo);
+$message = '';
+$message_type = ''; // Pour gérer la couleur du message (success/error)
+
+// Gérer l'ID de la prestation en cours d'édition
+$edit_id = isset($_GET['edit_id']) ? (int)$_GET['edit_id'] : null;
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action'])) {
+        if ($_POST['action'] === 'create') {
+            $libelle = $_POST['libelle_prestation'] ?? '';
+            if (!empty($libelle)) {
+                $result = $controller->create($libelle);
+                $message = $result ? "✅ Prestation ajoutée avec succès." : "❌ Erreur lors de l'ajout.";
+                $message_type = $result ? 'success' : 'error';
+            } else {
+                $message = "❌ Le libellé est requis.";
+                $message_type = 'error';
+            }
+        } elseif ($_POST['action'] === 'update') {
+            $id = $_POST['id_prestation'] ?? 0;
+            $libelle = $_POST['libelle_prestation'] ?? '';
+            if ($id > 0 && !empty($libelle)) {
+                $result = $controller->update($id, $libelle);
+                $message = $result ? "✅ Prestation modifiée avec succès." : "❌ Erreur lors de la modification.";
+                $message_type = $result ? 'success' : 'error';
+                $edit_id = null; // Revenir à la liste après modification
+            } else {
+                $message = "❌ ID ou libellé invalide.";
+                $message_type = 'error';
+            }
+        } elseif ($_POST['action'] === 'delete') {
+            $id = $_POST['id_prestation'] ?? 0;
+            if ($id > 0) {
+                $result = $controller->delete($id);
+                $message = $result ? "✅ Prestation supprimée avec succès." : "❌ Erreur lors de la suppression.";
+                $message_type = $result ? 'success' : 'error';
+            } else {
+                $message = "❌ ID invalide.";
+                $message_type = 'error';
+            }
+        }
+    }
+}
+
+// Gérer la recherche
+$search = $_GET['search'] ?? '';
+$prestations = $search ? $controller->searchPrestations($search) : $controller->getAllPrestations();
+?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Gestion des prestations</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des prestations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
+    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <!-- Titre -->
+        <h1 class="text-2xl font-bold mb-4">Gestion des prestations</h1>
 
-  <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
-    <h1 class="text-2xl font-bold mb-4">Gestion des prestations</h1>
+        <!-- Message -->
+        <?php if ($message): ?>
+            <p class="text-<?php echo $message_type === 'success' ? 'green-600' : 'red-600'; ?> font-semibold mb-4">
+                <?php echo htmlspecialchars($message); ?>
+            </p>
+        <?php endif; ?>
 
-    <!-- Formulaire d'ajout -->
-    <form id="form-create" class="mb-6">
-      <label class="block text-gray-700 mb-2">Nom de la prestation :</label>
-      <input type="text" id="libelle_prestation" required
-             class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
-      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
-        ➕ Ajouter une prestation
-      </button>
-    </form>
+        <!-- Formulaire d'ajout -->
+        <form action="" method="POST" class="mb-6">
+            <input type="hidden" name="action" value="create">
+            <label class="block text-gray-700 mb-2">Nom de la prestation :</label>
+            <input type="text" name="libelle_prestation" required
+                   class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
+                   placeholder="Ex: Wifi, Parking...">
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+                ➕ Ajouter une prestation
+            </button>
+        </form>
 
-    <!-- Message -->
-    <p id="message" class="text-green-600 font-semibold mb-4"></p>
+        <!-- Formulaire de recherche -->
+        <form action="" method="GET" class="mb-6">
+            <label class="block text-gray-700 mb-2">Rechercher une prestation :</label>
+            <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
+                   class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-green-300"
+                   placeholder="Ex: Wifi">
+            <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                🔍 Rechercher
+            </button>
+        </form>
 
-    <!-- Recherche -->
-    <form id="form-search" class="mb-6">
-      <label class="block text-gray-700 mb-2">Rechercher une prestation :</label>
-      <input type="text" id="search" placeholder="Ex: Wifi"
-             class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-green-300">
-      <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
-        🔍 Rechercher
-      </button>
-    </form>
-
-    <!-- Liste -->
-    <h2 class="text-xl font-semibold mb-2">📋 Liste des prestations</h2>
-    <div id="prestations-list" class="border rounded-lg p-4 bg-gray-50">
-      Chargement...
+        <!-- Liste des prestations -->
+        <h2 class="text-xl font-semibold mb-2">📋 Liste des prestations</h2>
+        <div class="border rounded-lg p-4 bg-gray-50">
+            <?php if (empty($prestations)): ?>
+                <p>Aucune prestation trouvée.</p>
+            <?php else: ?>
+                <?php foreach ($prestations as $prestation): ?>
+                    <?php if ($edit_id === $prestation['id_prestation']): ?>
+                        <!-- Mode édition -->
+                        <form action="" method="POST" class="flex justify-between items-center border-b py-2 gap-2">
+                            <input type="hidden" name="action" value="update">
+                            <input type="hidden" name="id_prestation" value="<?php echo $prestation['id_prestation']; ?>">
+                            <input type="text" name="libelle_prestation"
+                                   value="<?php echo htmlspecialchars($prestation['libelle_prestation']); ?>"
+                                   class="w-full border rounded-lg p-2 focus:ring focus:ring-yellow-300" required>
+                            <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">💾</button>
+                            <a href="?search=<?php echo urlencode($search); ?>" 
+                               class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400">Annuler</a>
+                        </form>
+                    <?php else: ?>
+                        <!-- Mode affichage -->
+                        <div class="flex justify-between items-center border-b py-2">
+                            <span><?php echo htmlspecialchars($prestation['libelle_prestation']); ?></span>
+                            <div>
+                                <a href="?edit_id=<?php echo $prestation['id_prestation']; ?>&search=<?php echo urlencode($search); ?>"
+                                   class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</a>
+                                <form action="" method="POST" class="inline">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="id_prestation" value="<?php echo $prestation['id_prestation']; ?>">
+                                    <button type="submit" onclick="return confirm('Supprimer cette prestation ?')"
+                                            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🗑️ Supprimer</button>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
     </div>
-  </div>
-
-  <script>
-    let prestationEditId = null; // ID de la prestation en édition
-
-    async function loadPrestations(search = "") {
-      try {
-        let url = "prestation_traitement.php?action=" + (search ? "search&search=" + encodeURIComponent(search) : "getAll");
-        const res = await fetch(url);
-        const data = await res.json();
-
-        if (!Array.isArray(data)) {
-          document.getElementById("prestations-list").innerHTML = "<p class='text-red-600'>Erreur: " + (data.message || "Format de réponse invalide") + "</p>";
-          return;
-        }
-
-        let html = "";
-        data.forEach(p => {
-          if (prestationEditId === p.id) {
-            // Affichage du champ texte pour édition
-            html += `
-              <form onsubmit="return savePrestationEdit(${p.id});" class="flex justify-between items-center border-b py-2 gap-2">
-                <input type="text" id="edit-libelle-${p.id}" value="${p.libelle_prestation.replace(/"/g, '&quot;')}"
-                  class="w-full border rounded-lg p-2 focus:ring focus:ring-yellow-300" required>
-                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">💾</button>
-                <button type="button" onclick="cancelPrestationEdit()" class="bg-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-400">Annuler</button>
-              </form>
-            `;
-          } else {
-            html += `
-              <div class="flex justify-between items-center border-b py-2">
-                <span>${p.libelle_prestation}</span>
-                <div>
-                  <button onclick="startPrestationEdit(${p.id})"
-                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</button>
-                  <button onclick="deletePrestation(${p.id})"
-                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">🗑️ Supprimer</button>
-                </div>
-              </div>
-            `;
-          }
-        });
-        document.getElementById("prestations-list").innerHTML = html || "<p>Aucune prestation trouvée.</p>";
-      } catch (error) {
-        document.getElementById("prestations-list").innerHTML = "<p class='text-red-600'>Erreur de chargement. Consultez la console.</p>";
-      }
-    }
-
-    function startPrestationEdit(id) {
-      prestationEditId = id;
-      loadPrestations();
-    }
-
-    function cancelPrestationEdit() {
-      prestationEditId = null;
-      loadPrestations();
-    }
-
-    async function savePrestationEdit(id) {
-      const libelle = document.getElementById("edit-libelle-" + id).value;
-      const formData = new FormData();
-      formData.append("id", id);
-      formData.append("libelle_prestation", libelle);
-
-      try {
-        const res = await fetch("prestation_traitement.php?action=update", { method: "POST", body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-          document.getElementById("message").innerText = "✅ Prestation modifiée.";
-          prestationEditId = null;
-          loadPrestations();
-        } else {
-          document.getElementById("message").innerText = "❌ Erreur: " + (data.message || "Erreur modification");
-        }
-      } catch (error) {
-        document.getElementById("message").innerText = "❌ Erreur de connexion.";
-      }
-      return false; // Empêche la soumission classique du formulaire
-    }
-
-    // Ajout
-    document.getElementById("form-create").addEventListener("submit", async e => {
-      e.preventDefault();
-      const libelle = document.getElementById("libelle_prestation").value;
-
-      const formData = new FormData();
-      formData.append("libelle_prestation", libelle);
-
-      try {
-        const res = await fetch("prestation_traitement.php?action=create", { method: "POST", body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-          document.getElementById("message").innerText = "✅ Nouvelle prestation créée !";
-          document.getElementById("libelle_prestation").value = "";
-          loadPrestations();
-        } else {
-          document.getElementById("message").innerText = "❌ Erreur: " + (data.message || "Erreur lors de la création.");
-        }
-      } catch (error) {
-        console.error("Erreur:", error);
-        document.getElementById("message").innerText = "❌ Erreur de connexion.";
-      }
-    });
-
-    // Recherche
-    document.getElementById("form-search").addEventListener("submit", e => {
-      e.preventDefault();
-      const search = document.getElementById("search").value;
-      loadPrestations(search);
-    });
-
-    // Suppression
-    async function deletePrestation(id) {
-      if (!confirm("Supprimer cette prestation ?")) return;
-      const formData = new FormData();
-      formData.append("id", id);
-
-      try {
-        const res = await fetch("prestation_traitement.php?action=delete", { method: "POST", body: formData });
-        const data = await res.json();
-
-        if (data.success) {
-          document.getElementById("message").innerText = "✅ Prestation supprimée.";
-          loadPrestations();
-        } else {
-          alert("❌ Erreur: " + (data.message || "Erreur suppression"));
-        }
-      } catch (error) {
-        console.error("Erreur:", error);
-        alert("❌ Erreur de connexion");
-      }
-    }
-
-    // Charger au démarrage
-    loadPrestations();
-  </script>
 </body>
 </html>

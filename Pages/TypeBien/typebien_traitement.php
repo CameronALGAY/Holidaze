@@ -62,11 +62,7 @@ class TypeBienController
 $controller = new TypeBienController($pdo);
 
 // --- Gestion du formulaire POST classique ---
-<<<<<<< HEAD
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-=======
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_GET['action']) || $_GET['action'] !== 'update')) {
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
     $des_typebien = trim($_POST['des_typebien'] ?? '');
 
     if (!empty($des_typebien)) {
@@ -84,28 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_GET['action']) || $_GET['
     }
 }
 
-<<<<<<< HEAD
-=======
-// --- Gestion du formulaire POST pour la modification ---
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'update') {
-    $id = $_GET['id'] ?? 0;
-    $des_typebien = trim($_POST['des_typebien'] ?? '');
-    if ($id && !empty($des_typebien)) {
-        $success = $controller->updateTypeBien($id, $des_typebien);
-        if ($success) {
-            header('Location: typebien_form.php?success=1');
-            exit;
-        } else {
-            header('Location: typebien_form.php?error=1');
-            exit;
-        }
-    } else {
-        header('Location: typebien_form.php?error=2');
-        exit;
-    }
-}
-
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
 // --- Gestion des requêtes AJAX ---
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
@@ -132,46 +106,7 @@ if (isset($_GET['action'])) {
             ]);
             break;
 
-<<<<<<< HEAD
-=======
-        case 'delete':
-            $id = $_GET['id'] ?? 0;
-            if ($id) {
-                $success = $controller->deleteTypeBien($id);
-                if ($success) {
-                    header('Location: typebien_form.php?success=1');
-                    exit;
-                } else {
-                    header('Location: typebien_form.php?error=1');
-                    exit;
-                }
-            } else {
-                header('Location: typebien_form.php?error=2');
-                exit;
-            }
-
-        case 'update':
-            $id = $_GET['id'] ?? 0;
-            // Afficher le formulaire de modification
-            $type = $controller->getTypeBienById($id);
-            if ($type) {
-                ?>
-                <form action="typebien_traitement.php?action=update&id=<?= $id ?>" method="POST">
-                    <input type="text" name="des_typebien" value="<?= htmlspecialchars($type['des_typebien']) ?>" required>
-                    <button type="submit">Modifier</button>
-                </form>
-                <?php
-            } else {
-                echo "Type de bien introuvable.";
-            }
-            break;
-
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f
         default:
             echo json_encode(['success' => false, 'message' => 'Action non reconnue']);
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> b8f0dd7b630595d9fee60f5e9d6425adcbb52a9f

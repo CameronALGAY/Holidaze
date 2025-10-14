@@ -27,9 +27,15 @@ try {
                 ];
                 break;
 
+            case 'getByLibelle':
+                $idBien = $_GET['idBien'] ?? 0;
+                $prestations = $controller->getByLibelle($idBien);
+                $response = ['success' => true, 'data' => $prestations];
+                break;
+
             case 'getByBien':
                 $idBien = $_GET['idBien'] ?? 0;
-                $prestations = $controller->getPrestationsByBien($idBien);
+                $prestations = $controller->getByLibelle($idBien);
                 $response = ['success' => true, 'data' => $prestations];
                 break;
 
@@ -64,7 +70,7 @@ try {
                     break;
                 }
 
-                $result = $controller->createPrestation($libelle_prestation);
+                $result = $controller->create($libelle_prestation);
                 $response = [
                     'success' => $result,
                     'message' => $result ? 'Prestation créée avec succès' : 'Erreur lors de la création'
@@ -80,7 +86,7 @@ try {
                     break;
                 }
 
-                $result = $controller->updatePrestation($id, $libelle_prestation);
+                $result = $controller->update($id, $libelle_prestation);
                 $response = [
                     'success' => $result,
                     'message' => $result ? 'Prestation modifiée avec succès' : 'Erreur lors de la modification'
@@ -89,7 +95,7 @@ try {
 
             case 'delete':
                 $id = $_POST['id'] ?? 0;
-                $result = $controller->deletePrestation($id);
+                $result = $controller->delete($id);
                 $response = [
                     'success' => $result,
                     'message' => $result ? 'Prestation supprimée avec succès' : 'Erreur lors de la suppression'
