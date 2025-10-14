@@ -1,108 +1,67 @@
 <?php
+require_once '../../include/db.php';
 
-include_once '../Communes/communes_class.php';
-include_once '../TypeBien/typebien_class.php';
-class Bien
+class BiensController
 {
-    private $idBien;
-    private $nomBien;
-    private $rueBien;
-    private $compBien;
-    private $superficieBien;
-    private $descriptionBien;
-    private $animauxBien;
-    private $nbCouchagesBien;
-    private $id_commune;
-    private $id_typebien;
+    private $pdo;
 
-    // Attributs supplémentaires pour les jointures
-    private $nomProprietaire;
-    private $prenomProprietaire;
-
-    function __construct($idBien, $nomBien, $descriptionBien, $rueBien, $compBien, $superficieBien, $animauxBien, $nbCouchagesBien, $id_commune, $id_typebien)
-
+    public function __construct($pdo)
     {
-        $this->idBien = $idBien;
-        $this->nomBien = $nomBien;
-        $this->rueBien = $rueBien;
-        $this->compBien = $compBien;
-        $this->superficieBien = $superficieBien;
-        $this->descriptionBien = $descriptionBien;
-        $this->animauxBien = $animauxBien;
-        $this->nbCouchagesBien = $nbCouchagesBien;
-        $this->id_commune = $id_commune;
-        $this->id_typebien = $id_typebien;
+        $this->pdo = $pdo;
     }
 
-    // GETTERS & SETTERS
-    public function getIdBien()
+    // Récupérer tous les biens
+    public function getAllBiens()
     {
-        return $this->idBien;
-    }
-    public function getNomBien()
-    {
-        return $this->nomBien;
-    }
-    public function getRueBien()
-    {
-        return $this->rueBien;
-    }
-    public function getCompBien()
-    {
-        return $this->compBien;
-    }
-    public function getSuperficieBien()
-    {
-        return $this->superficieBien;
-    }
-    public function getDescriptionBien()
-    {
-        return $this->descriptionBien;
-    }
-    public function getAnimauxBien()
-    {
-        return $this->animauxBien;
-    }
-    public function getNbCouchagesBien()
-    {
-        return $this->nbCouchagesBien;
-    }
-    public function getIdCommune()
-    {
-        return $this->id_commune;
-    }
-    public function getIdTypeBien()
-    {
-        return $this->id_typebien;
+        $sql = "SELECT b.*, c.nom_commune, c.cp_commune, t.des_typebien
+                FROM bien b
+                LEFT JOIN commune c ON b.id_commune = c.id_commune
+                LEFT JOIN type_bien t ON b.id_typebien = t.id_typebien
+                ORDER BY b.nom_bien";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function setNomBien($nomBien)
+    // Récupérer un bien par ID
+    public function getBienById($id)
     {
-        $this->nomBien = $nomBien;
+        $sql = "SELECT b.*, c.nom_commune, c.cp_commune, t.des_typebien
+                FROM bien b
+                LEFT JOIN commune c ON b.id_commune = c.id_commune
+                LEFT JOIN type_bien t ON b.id_typebien = t.id_typebien
+                WHERE b.id_bien = ?";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    public function setRueBien($rueBien)
+
+    // Créer un bien
+    public function createBien($nom, $description, $rue, $com, $superficie, $animaux, $nbCouchages, $id_commune, $id_typebien)
     {
-        $this->rueBien = $rueBien;
+        $stmt = $this->pdo->prepare("
+            INSERT INTO bien (nom_bien, description_bien, rue_bien, com_bien, superficie_bien, animaux_bien, nb_couchage, id_commune, id_typebien)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        return $stmt->execute([$nom, $description, $rue, $com, $superficie, $animaux, $nbCouchages, $id_commune, $id_typebien]);
     }
-    public function setCompBien($compBien)
+
+    // Mettre à jour un bien
+    public function updateBien($id, $nom, $description, $rue, $com, $superficie, $animaux, $nbCouchages, $id_commune, $id_typebien)
     {
-        $this->compBien = $compBien;
+        $stmt = $this->pdo->prepare("
+            UPDATE bien
+            SET nom_bien = ?, description_bien = ?, rue_bien = ?, com_bien = ?, superficie_bien = ?, 
+                animaux_bien = ?, nb_couchage = ?, id_commune = ?, id_typebien = ?
+            WHERE id_bien = ?
+        ");
+        return $stmt->execute([$nom, $description, $rue, $com, $superficie, $animaux, $nbCouchages, $id_commune, $id_typebien, $id]);
     }
-    public function setSuperficieBien($superficieBien)
+
+    // Supprimer un bien
+    public function deleteBien($id)
     {
-        $this->superficieBien = $superficieBien;
+        $stmt = $this->pdo->prepare("DELETE FROM bien WHERE id_bien = ?");
+        return $stmt->execute([$id]);
     }
-    public function setDescriptionBien($descriptionBien)
-    {
-        $this->descriptionBien = $descriptionBien;
-    }
-    public function setAnimauxBien($animauxBien)
-    {
-        $this->animauxBien = $animauxBien;
-    }
-    public function setNbCouchagesBien($nbCouchagesBien)
-    {
-        $this->nbCouchagesBien = $nbCouchagesBien;
-    }
-    
 }
+?>
