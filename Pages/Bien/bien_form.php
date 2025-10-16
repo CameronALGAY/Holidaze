@@ -27,7 +27,7 @@ $biens = $controller->getAllBiens();
     <h1 class="text-2xl font-bold mb-4">Gestion des biens</h1>
 
     <!-- Formulaire ajout/modif -->
-    <form method="POST" action="bien_traitement.php" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <form method="POST" action="bien_traitement.php" enctype="multipart/form-data" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <input type="hidden" name="action" value="<?= $editId ? 'update' : 'create' ?>">
         <input type="hidden" name="id_bien" value="<?= $editBien['id_bien'] ?? '' ?>">
 
@@ -56,7 +56,7 @@ $biens = $controller->getAllBiens();
         </div>
 
         <div>
-            <label class="block text-gray-700 mb-2">Superficie :</label>
+            <label class="block text-gray-700 mb-2">Superficie (m²) :</label>
             <input type="number" name="superficieBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
                    value="<?= htmlspecialchars($editBien['superficie_bien'] ?? '') ?>">
         </div>
@@ -99,6 +99,19 @@ $biens = $controller->getAllBiens();
             <div id="typebienResults" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 w-full hidden"></div>
         </div>
 
+        <!-- Bouton pour dérouler le sous-formulaire photo -->
+        <div class="md:col-span-2">
+            <button type="button" onclick="togglePhotoForm()" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                📷 Ajouter une photo (cliquez pour dérouler)
+            </button>
+        </div>
+
+        <!-- Sous-formulaire photo (caché par défaut) -->
+        <div id="photoForm" class="md:col-span-2 hidden">
+            <label class="block text-gray-700 mb-2">Choisir une photo :</label>
+            <input type="file" name="photo" accept="image/*" class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
+        </div>
+
         <div class="md:col-span-2">
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">
                 <?= $editId ? '💾 Modifier le bien' : '➕ Ajouter un bien' ?>
@@ -106,46 +119,60 @@ $biens = $controller->getAllBiens();
         </div>
     </form>
 
-    <!-- Liste des biens -->
-    <h2 class="text-xl font-semibold mb-2">📋 Liste des biens</h2>
-    <div class="border rounded-lg p-4 bg-gray-50">
-        <?php if ($biens): ?>
-            <?php foreach ($biens as $b): ?>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 border-b py-2 items-center">
+<!-- Liste des biens -->
+<h2 class="text-xl font-semibold mb-2">📋 Liste des biens</h2>
+<div class="border rounded-lg p-4 bg-gray-50">
+    <?php if ($biens): ?>
+        <?php foreach ($biens as $b): ?>
+            <div class="grid grid-cols-3 gap-2 border-b py-2 items-center">
+                <div>
+                    <span class="font-semibold"><?= htmlspecialchars($b['nom_bien']) ?></span>
+                    <div class="text-gray-600 text-sm"><?= htmlspecialchars($b['description_bien']) ?></div>
+                    <div class="text-gray-500 text-xs"><?= htmlspecialchars($b['rue_bien'] . ($b['com_bien'] ? ' - ' . $b['com_bien'] : '')) ?></div>
+                </div>
+                <div>
+                    <!-- Affichage de la première photo si elle existe -->
+                    <?php $photos = $controller->getPhotosByBienId($b['id_bien']); ?>
+                    <?php if ($photos && count($photos) > 0): ?>
+                        <img src="/<?= htmlspecialchars($photos[0]['lien_photo']) ?>" alt="<?= htmlspecialchars($photos[0]['nom_photo']) ?>" class="w-24 h-24 object-cover">
+                    <?php else: ?>
+                        <span class="text-gray-500">Aucune photo</span>
+                    <?php endif; ?>
+                </div>
+                <div class="flex flex-col justify-between h-full">
                     <div>
-                        <span class="font-semibold"><?= htmlspecialchars($b['nom_bien']) ?></span>
-                        <div class="text-gray-600 text-sm"><?= htmlspecialchars($b['description_bien']) ?></div>
-                        <div class="text-gray-500 text-xs"><?= htmlspecialchars($b['rue_bien'] . ($b['com_bien'] ? ' - '.$b['com_bien'] : '')) ?></div>
+                        <div>Superficie : <span class="font-semibold"><?= htmlspecialchars($b['superficie_bien']) ?> m²</span></div>
+                        <div>Animaux : <span class="font-semibold"><?= $b['animaux_bien'] ? 'Oui' : 'Non' ?></span></div>
+                        <div>Couchages : <span class="font-semibold"><?= htmlspecialchars($b['nb_couchage']) ?></span></div>
+                        <div>Commune : <span class="font-semibold"><?= htmlspecialchars($b['nom_commune']) ?></span></div>
+                        <div>Type : <span class="font-semibold"><?= htmlspecialchars($b['des_typebien']) ?></span></div>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <div>Superficie : <span class="font-semibold"><?= htmlspecialchars($b['superficie_bien']) ?> m²</span></div>
-                            <div>Animaux : <span class="font-semibold"><?= $b['animaux_bien'] ? 'Oui' : 'Non' ?></span></div>
-                            <div>Couchages : <span class="font-semibold"><?= htmlspecialchars($b['nb_couchage']) ?></span></div>
-                            <div>Commune : <span class="font-semibold"><?= htmlspecialchars($b['nom_commune']) ?></span></div>
-                            <div>Type : <span class="font-semibold"><?= htmlspecialchars($b['des_typebien']) ?></span></div>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="bien_form.php?edit=<?= $b['id_bien'] ?>"
-                               class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</a>
-                            <a href="#"
-                               class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                               onclick="if(confirm('Voulez-vous vraiment supprimer ce bien ?')){
-                                   fetch('bien_traitement.php', {
-                                       method: 'POST',
-                                       headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                                       body: 'action=delete&id_bien=<?= $b['id_bien'] ?>'
-                                   }).then(()=> window.location='bien_form.php');
-                               }">🗑️ Supprimer</a>
-                        </div>
+                    <div class="flex gap-2 mt-2">
+                        <a href="bien_form.php?edit=<?= $b['id_bien'] ?>"
+                           class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</a>
+                        <a href="#"
+                           class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                           onclick="if(confirm('Voulez-vous vraiment supprimer ce bien ?')){ 
+                               console.log('Tentative de suppression pour id_bien: <?= $b['id_bien'] ?>'); 
+                               fetch('bien_traitement.php', {
+                                   method: 'POST',
+                                   headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                                   body: new URLSearchParams({ action: 'delete', id_bien: '<?= $b['id_bien'] ?>' })
+                               }).then(response => response.json()).then(data => {
+                                   console.log('Réponse du serveur:', data);
+                                   if (data.success) window.location='bien_form.php';
+                                   else console.log('Échec:', data.message);
+                               }).catch(error => console.log('Erreur fetch:', error));
+                           }">🗑️ Supprimer</a>
                     </div>
                 </div>
-            <?php endforeach; ?>
-        <?php else: ?>
-            <p class="text-gray-500">Aucun bien trouvé.</p>
-        <?php endif; ?>
-    </div>
+            </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <p class="text-gray-500">Aucun bien trouvé.</p>
+    <?php endif; ?>
 </div>
+
 
 <!-- Scripts auto-complétion -->
 <script>
@@ -228,6 +255,16 @@ function displayTypeResults(types){
         });
         typeResults.appendChild(item);
     });
+}
+
+// Nouvelle fonction pour toggle le sous-formulaire photo
+function togglePhotoForm() {
+    var form = document.getElementById('photoForm');
+    if (form.style.display === 'none' || form.style.display === '') {
+        form.style.display = 'block';
+    } else {
+        form.style.display = 'none';
+    }
 }
 </script>
 </body>

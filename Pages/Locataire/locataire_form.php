@@ -113,8 +113,9 @@ $locataires = $search ? $controller->searchLocataires($search) : $controller->ge
     </style>
 </head>
 <body class="bg-gray-100 p-6">
-    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <!-- Titre -->
+    <?php include '../header.php'; ?>
+
+    <main class="max-w-2xl mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
         <h1 class="text-2xl font-bold mb-4">Gestion des locataires</h1>
 
         <!-- Message -->
@@ -182,6 +183,12 @@ $locataires = $search ? $controller->searchLocataires($search) : $controller->ge
                     <input type="password" name="pass_locataire" required
                            class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
                 </div>
+                <div>
+            <label for="confirm_pass" class="block text-gray-700 mb-2">Confirmer le mot de passe :</label>
+            <input type="password" id="confirm_pass" required
+                   class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
+        </div>
+
                 <div class="flex items-center">
                     <input type="checkbox" id="isEntreprise" name="isEntreprise" value="1"
                            onclick="toggleEntrepriseFields()"
