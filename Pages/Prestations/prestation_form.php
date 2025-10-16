@@ -62,10 +62,10 @@ $prestations = $search ? $controller->searchPrestations($search) : $controller->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
-    <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
-        <!-- Titre -->
-        <h1 class="text-2xl font-bold mb-4">Gestion des prestations</h1>
+<?php include '../header.php'; ?>
 
+    <main class="max-w-2xl mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">Gestion des préstations</h1>
         <!-- Message -->
         <?php if ($message): ?>
             <p class="text-<?php echo $message_type === 'success' ? 'green-600' : 'red-600'; ?> font-semibold mb-4">

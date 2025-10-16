@@ -6,9 +6,12 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">
+<?php include '../header.php'; ?>
 
-  <div class="max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
-    <h1 class="text-2xl font-bold mb-4">Gestion des saisons</h1>
+
+  <main class="max-w-2xl mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">Gestion des saisons</h1>
+
 
     <!-- Formulaire d'ajout -->
     <form id="form-create" class="mb-6">
