@@ -3,8 +3,10 @@ require_once '../../include/db.php';
 require_once 'bien_class.php';
 require_once '../Communes/communes_class.php';
 require_once '../TypeBien/typebien_class.php';
+require_once '../Tarifs/tarifs_traitement.php'; // pour controller tarifs
 
 $controller = new BiensController($pdo);
+$tarifController = new TarifsController($pdo);
 
 // Vérifier si on est en mode édition
 $editId = $_GET['edit'] ?? null;
@@ -31,36 +33,32 @@ $biens = $controller->getAllBiens();
         <input type="hidden" name="action" value="<?= $editId ? 'update' : 'create' ?>">
         <input type="hidden" name="id_bien" value="<?= $editBien['id_bien'] ?? '' ?>">
 
+        <!-- Infos du bien -->
         <div>
             <label class="block text-gray-700 mb-2">Nom du bien :</label>
             <input type="text" name="nomBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
                    value="<?= htmlspecialchars($editBien['nom_bien'] ?? '') ?>">
         </div>
-
         <div>
             <label class="block text-gray-700 mb-2">Description :</label>
             <input type="text" name="descriptionBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
                    value="<?= htmlspecialchars($editBien['description_bien'] ?? '') ?>">
         </div>
-
         <div>
             <label class="block text-gray-700 mb-2">Rue :</label>
             <input type="text" name="rueBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
                    value="<?= htmlspecialchars($editBien['rue_bien'] ?? '') ?>">
         </div>
-
         <div>
             <label class="block text-gray-700 mb-2">Complément :</label>
             <input type="text" name="compBien" class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
                    value="<?= htmlspecialchars($editBien['com_bien'] ?? '') ?>">
         </div>
-
         <div>
             <label class="block text-gray-700 mb-2">Superficie :</label>
             <input type="number" name="superficieBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
                    value="<?= htmlspecialchars($editBien['superficie_bien'] ?? '') ?>">
         </div>
-
         <div>
             <label class="block text-gray-700 mb-2">Animaux acceptés :</label>
             <select name="animauxBien" class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
@@ -68,7 +66,6 @@ $biens = $controller->getAllBiens();
                 <option value="0" <?= isset($editBien['animaux_bien']) && !$editBien['animaux_bien'] ? 'selected' : '' ?>>Non</option>
             </select>
         </div>
-
         <div>
             <label class="block text-gray-700 mb-2">Nombre de couchages :</label>
             <input type="number" name="nbCouchagesBien" required class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300"
@@ -99,6 +96,32 @@ $biens = $controller->getAllBiens();
             <div id="typebienResults" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 w-full hidden"></div>
         </div>
 
+        <!-- Sous-formulaire tarifs intégré -->
+        <div id="tarifFormContainer" class="border p-4 rounded-lg bg-gray-50 md:col-span-2 mb-4">
+            <h3 class="text-lg font-semibold mb-2">Ajouter un tarif pour ce bien</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label>Semaine :</label>
+                    <input type="number" name="semaine_tarif" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label>Année :</label>
+                    <input type="number" name="annee_tarif" class="w-full border rounded-lg p-2">
+                </div>
+                <div>
+                    <label>Tarif (€) :</label>
+                    <input type="number" step="0.01" name="tarif" class="w-full border rounded-lg p-2">
+                </div>
+                <div class="relative md:col-span-2">
+                    <label>Saison :</label>
+                    <input type="text" id="saisonSearch" autocomplete="off" class="w-full border rounded-lg p-2" placeholder="Nom de la saison">
+                    <input type="hidden" name="id_saison" id="id_saison">
+                    <div id="saisonResults" class="absolute z-10 bg-white border rounded-lg shadow-lg mt-1 w-full hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bouton principal -->
         <div class="md:col-span-2">
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">
                 <?= $editId ? '💾 Modifier le bien' : '➕ Ajouter un bien' ?>
@@ -149,38 +172,34 @@ $biens = $controller->getAllBiens();
 
 <!-- Scripts auto-complétion -->
 <script>
+// Auto-complétion communes
 const communeSearch = document.getElementById('communeSearch');
 const communeIdInput = document.getElementById('communeIdInput');
 const communesResults = document.getElementById('communesResults');
-
-communeSearch.addEventListener('input', function() {
+communeSearch.addEventListener('input', function(){
     const query = this.value.trim();
     if(query.length >= 2) searchCommunes(query);
-    else {
-        communesResults.classList.add('hidden');
-        communesResults.innerHTML = '';
-    }
+    else { communesResults.classList.add('hidden'); communesResults.innerHTML = ''; }
 });
-
 function searchCommunes(query){
     communesResults.innerHTML = '<div class="p-3 text-center text-gray-600">Recherche en cours...</div>';
     communesResults.classList.remove('hidden');
     fetch(`../../ajax/ajax_bien.php?q=${encodeURIComponent(query)}`)
         .then(res => res.json())
-        .then(data => {
+        .then(data => { 
             if(data.success && data.communes.length > 0) displayCommuneResults(data.communes);
             else communesResults.innerHTML = '<div class="p-3 text-center text-gray-600">Aucune commune trouvée</div>';
         })
-        .catch(() => communesResults.innerHTML = '<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
+        .catch(()=> communesResults.innerHTML = '<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
 }
-
 function displayCommuneResults(communes){
     communesResults.innerHTML = '';
-    communes.forEach(c => {
+    communes.forEach(c=>{
         const item = document.createElement('div');
         item.className = 'p-2 cursor-pointer hover:bg-blue-100';
-        item.innerHTML = `<div class="font-semibold">${c.nom_commune}</div><div class="text-sm text-gray-600">${c.cp_commune ? 'CP: '+c.cp_commune : ''} ${c.commune_departement ? ' - Dép: '+c.commune_departement : ''}</div>`;
-        item.addEventListener('click', () => {
+        item.innerHTML = `<div class="font-semibold">${c.nom_commune}</div>
+                          <div class="text-sm text-gray-600">${c.cp_commune ? 'CP: '+c.cp_commune : ''} ${c.commune_departement ? ' - Dép: '+c.commune_departement : ''}</div>`;
+        item.addEventListener('click', ()=>{
             communeSearch.value = c.nom_commune;
             communeIdInput.value = c.id_commune;
             communesResults.classList.add('hidden');
@@ -189,46 +208,76 @@ function displayCommuneResults(communes){
     });
 }
 
-// Type de bien auto-complétion
+// Auto-complétion type bien
 const typeSearch = document.getElementById('typebienSearch');
 const typeIdInput = document.getElementById('typebienIdInput');
 const typeResults = document.getElementById('typebienResults');
-
 typeSearch.addEventListener('input', function(){
     const query = this.value.trim();
     if(query.length >= 1) searchTypeBien(query);
-    else {
-        typeResults.classList.add('hidden');
-        typeResults.innerHTML = '';
-    }
+    else { typeResults.classList.add('hidden'); typeResults.innerHTML = ''; }
 });
-
 function searchTypeBien(query){
     typeResults.innerHTML = '<div class="p-3 text-center text-gray-600">Recherche en cours...</div>';
     typeResults.classList.remove('hidden');
     fetch(`../../ajax/ajax_typebiens.php?action=search&search=${encodeURIComponent(query)}`)
         .then(res => res.json())
-        .then(data => {
-            if(data.success && data.data.length > 0) displayTypeResults(data.data);
-            else typeResults.innerHTML = '<div class="p-3 text-center text-gray-600">Aucun type trouvé</div>';
+        .then(data=>{
+            if(data.success && data.data.length>0) displayTypeResults(data.data);
+            else typeResults.innerHTML='<div class="p-3 text-center text-gray-600">Aucun type trouvé</div>';
         })
-        .catch(()=> typeResults.innerHTML = '<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
+        .catch(()=> typeResults.innerHTML='<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
 }
-
 function displayTypeResults(types){
     typeResults.innerHTML = '';
-    types.forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'p-2 cursor-pointer hover:bg-blue-100';
-        item.textContent = t.des_typebien;
-        item.addEventListener('click', ()=>{
-            typeSearch.value = t.des_typebien;
-            typeIdInput.value = t.id_typebien;
+    types.forEach(t=>{
+        const item=document.createElement('div');
+        item.className='p-2 cursor-pointer hover:bg-blue-100';
+        item.textContent=t.des_typebien;
+        item.addEventListener('click',()=>{
+            typeSearch.value=t.des_typebien;
+            typeIdInput.value=t.id_typebien;
             typeResults.classList.add('hidden');
         });
         typeResults.appendChild(item);
     });
 }
+
+// Auto-complétion saison (tarif)
+const saisonSearch = document.getElementById('saisonSearch');
+const id_saison = document.getElementById('id_saison');
+const saisonResults = document.getElementById('saisonResults');
+saisonSearch.addEventListener('input', function(){
+    const query=this.value.trim();
+    if(query.length>=1) searchSaison(query);
+    else { saisonResults.classList.add('hidden'); saisonResults.innerHTML=''; }
+});
+function searchSaison(query){
+    saisonResults.innerHTML='<div class="p-3 text-center text-gray-600">Recherche en cours...</div>';
+    saisonResults.classList.remove('hidden');
+    fetch(`../../Pages/Tarifs/tarifs_traitement.php?autocomplete=saison&q=${encodeURIComponent(query)}`)
+        .then(res=>res.json())
+        .then(data=>{
+            if(data.success && data.data.length>0) displaySaisonResults(data.data);
+            else saisonResults.innerHTML='<div class="p-3 text-center text-gray-600">Aucune saison trouvée</div>';
+        })
+        .catch(()=> saisonResults.innerHTML='<div class="p-3 text-center text-red-600">Erreur de connexion</div>');
+}
+function displaySaisonResults(saisons){
+    saisonResults.innerHTML='';
+    saisons.forEach(s=>{
+        const item=document.createElement('div');
+        item.className='p-2 cursor-pointer hover:bg-blue-100';
+        item.textContent=s.libelle_saison;
+        item.addEventListener('click',()=>{
+            saisonSearch.value=s.libelle_saison;
+            id_saison.value=s.id_saison;
+            saisonResults.classList.add('hidden');
+        });
+        saisonResults.appendChild(item);
+    });
+}
 </script>
+
 </body>
 </html>

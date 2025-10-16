@@ -12,6 +12,33 @@ if (!$pdo) {
     exit;
 }
 
+// ✅ AJOUT POUR L'AUTOCOMPLÉTION
+if (isset($_GET['autocomplete']) && $_GET['autocomplete'] === 'bien') {
+    $term = $_GET['term'] ?? '';
+
+    try {
+        $stmt = $pdo->prepare("SELECT idBien, nomBien FROM bien WHERE nomBien LIKE ? LIMIT 10");
+        $stmt->execute(['%' . $term . '%']);
+        $biens = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $results = [];
+        foreach ($biens as $b) {
+            $results[] = [
+                'id' => $b['idBien'],
+                'label' => $b['nomBien'],
+                'value' => $b['nomBien']
+            ];
+        }
+
+        echo json_encode($results);
+    } catch (PDOException $e) {
+        echo json_encode(['success' => false, 'message' => 'Erreur SQL: ' . $e->getMessage()]);
+    }
+    exit;
+}
+// ✅ FIN DE L'AJOUT
+
+
 // Instanciation du contrôleur
 $controller = new BiensController($pdo);
 
@@ -55,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     switch ($action) {
         case 'create':
             $result = $controller->createBien($nom, $description, $rue, $com, $superficie, $animaux, $nbCouchages, $id_commune, $id_typebien);
-            // Redirection après création
             header('Location: bien_form.php?success=' . ($result ? '1' : '0'));
             exit;
         case 'update':
@@ -69,7 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'delete':
             if ($id_bien) {
                 $result = $controller->deleteBien($id_bien);
-                // Pour suppression via AJAX
                 echo json_encode(['success' => $result]);
                 exit;
             }
@@ -79,5 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             echo json_encode(['success' => false, 'message' => 'Action non reconnue']);
             exit;
     }
+
+    if(isset($_GET['action']) && $_GET['action']==='getByBien'){
+    $idBien = $_GET['idBien'] ?? 0;
+    $stmt = $pdo->prepare("SELECT * FROM tarifs WHERE idBien=? ORDER BY annee_tarif DESC, semaine_tarif");
+    $stmt->execute([$idBien]);
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    exit;
+}
+
 }
 ?>
