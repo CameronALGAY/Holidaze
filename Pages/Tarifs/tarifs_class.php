@@ -40,21 +40,19 @@ class Tarifs
     public function setIdSaison($id_saison) { $this->id_saison = $id_saison; }
 
     // --- CREATE ---
-    public function create()
-    {
-        $sql = "INSERT INTO tarif (semaine_tarif, annee_tarif, tarif, id_bien, id_saison) 
-                VALUES (:semaine, :annee, :tarif, :idBien, :idSaison)";
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([
-            ':semaine'  => $this->semaine_tarif,
-            ':annee'    => $this->annee_tarif,
-            ':tarif'    => $this->tarif,
-            ':idBien'   => $this->id_bien,
-            ':idSaison' => $this->id_saison
-        ]);
-        $this->id_tarif = $this->pdo->lastInsertId();
-        return $this->id_tarif;
-    }
+    public function create() {
+    $sql = "INSERT INTO tarif (semaine_tarif, annee_tarif, tarif, id_bien, id_saison)
+            VALUES (:semaine, :annee, :tarif, :id_bien, :id_saison)";
+    $stmt = $this->pdo->prepare($sql);
+    return $stmt->execute([
+        ':semaine' => $this->semaine_tarif,
+        ':annee' => $this->annee_tarif,
+        ':tarif' => $this->tarif,
+        ':id_bien' => $this->id_bien,
+        ':id_saison' => $this->id_saison
+    ]);
+}
+
 
     // --- READ (un tarif)
     public function read($id)
