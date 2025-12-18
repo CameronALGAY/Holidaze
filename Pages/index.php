@@ -14,14 +14,41 @@ $controller = new BiensController($pdo);
 $biens = $controller->getAllBiens();
 
 // === DESTINATIONS POPULAIRES ===
+// Liste des grandes villes pour les destinations populaires
+$villesMajeurs = ['Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Lille', 'Angers', 'Grenoble'];
+
+// Mapping des images pour chaque grande ville 
+$imagesVilles = [
+    'Paris' => '../Photo/villes/paris.jpg',
+    'Lyon' => '../Photo/villes/lyon.jpg',
+    'Marseille' => '../Photo/villes/marseille.jpg',
+    'Bordeaux' => '../Photo/villes/bordeaux.jpg',
+    'Toulouse' => '../Photo/villes/toulouse.jpg',
+    'Nice' => '../Photo/villes/nice.jpg',
+    'Nantes' => '../Photo/villes/nantes.jpg',
+    'Strasbourg' => '../Photo/villes/strasbourg.jpg',
+    'Montpellier' => '../Photo/villes/montpellier.jpeg',
+    'Lille' => '../Photo/villes/lille.jpg',
+    'Angers' => '../Photo/villes/angers.jpg',
+    'Grenoble' => '../Photo/villes/grenoble.jpg',
+];
+
+// Compter les biens par commune et garder uniquement les grandes villes
 $communesUniques = [];
 foreach ($biens as $b) {
     $commune = $b['nom_commune'] ?? 'Inconnue';
+    
+    // Filtrer uniquement les grandes villes
+    if (!in_array($commune, $villesMajeurs)) {
+        continue;
+    }
+    
     $cp = $b['cp_commune'] ?? '';
     $key = $commune . '_' . $cp;
     $communesUniques[$key] ??= ['nom' => $commune, 'cp' => $cp, 'count' => 0];
     $communesUniques[$key]['count']++;
 }
+
 uasort($communesUniques, fn($a,$b) => $b['count'] - $a['count']);
 $topCommunes = array_slice($communesUniques, 0, 4, true);
 
@@ -75,9 +102,7 @@ if (empty($topCommunes)) {
     <h2 class="text-4xl font-bold text-center mb-12">Destinations populaires</h2>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         <?php foreach ($topCommunes as $c):
-            $img = file_exists("../Photo/villes/" . strtolower(str_replace(' ', '-', $c['nom'])) . ".jpg")
-                ? "../Photo/villes/" . strtolower(str_replace(' ', '-', $c['nom'])) . ".jpg"
-                : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800";
+            $img = $imagesVilles[$c['nom']] ?? "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800";
         ?>
             <a href="../recherche.php?destination=<?= urlencode($c['nom']) ?>" class="rounded-2xl overflow-hidden shadow-xl relative h-80">
                 <img src="<?= $img ?>" alt="<?= htmlspecialchars($c['nom']) ?>" class="w-full h-full object-cover">
