@@ -8,20 +8,29 @@ if (!isset($_SESSION['utilisateur_id'])) {
     exit;
 }
 
-// Chemins corrects depuis Pages/Utilisateur/
+// Chemins corrects depuis Pages/Contact/
 require_once '../../include/db.php';
 
 $utilisateur_id = $_SESSION['utilisateur_id'];
 
-// Récupération des messages de l'utilisateur (non supprimés par l'admin)
+// Récupération des conversations de l'utilisateur (non supprimées)
 $stmt = $pdo->prepare("
-    SELECT m.id_message, m.sujet, m.message, m.date_envoi, m.lu, m.reponse_admin, m.date_reponse
-    FROM messages_contact m 
-    WHERE m.id_utilisateur = ? AND m.supprime = 0
-    ORDER BY m.date_envoi DESC
+    SELECT c.id_conversation, c.sujet, c.date_creation, c.lu, c.statut,
+           m_last.date_envoi AS date_dernier_message,
+           m_last.role_expediteur AS derniere_expediteur
+    FROM conversations c 
+    LEFT JOIN messages m_last ON m_last.id_message = (
+        SELECT id_message 
+        FROM messages 
+        WHERE id_conversation = c.id_conversation 
+        ORDER BY date_envoi DESC 
+        LIMIT 1
+    )
+    WHERE c.id_utilisateur = ? AND c.supprime = 0
+    ORDER BY c.date_creation DESC
 ");
 $stmt->execute([$utilisateur_id]);
-$messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 
@@ -49,7 +58,7 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <i class="fas fa-envelope mr-3 text-indigo-600"></i> Mes Messages
     </h1>
 
-    <?php if (empty($messages)): ?>
+    <?php if (empty($conversations)): ?>
         <div class="text-center py-16 border-2 border-dashed border-gray-300 rounded-lg">
             <i class="fas fa-inbox text-6xl text-gray-400 mb-4"></i>
             <p class="text-xl text-gray-600">Vous n'avez envoyé aucun message pour le moment.</p>
@@ -59,35 +68,43 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php else: ?>
         <div class="space-y-6">
-            <?php foreach ($messages as $msg): ?>
+            <?php foreach ($conversations as $conv): ?>
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 hover:shadow-md transition duration-150 ease-in-out">
                     <div class="flex justify-between items-start">
                         <div>
                             <h2 class="text-xl font-semibold text-gray-800 mb-1">
-                                <?= htmlspecialchars($msg['sujet']) ?>
+                                <?= htmlspecialchars($conv['sujet']) ?>
                             </h2>
                             <p class="text-sm text-gray-500">
-                                Envoyé le <?= date('d/m/Y à H:i', strtotime($msg['date_envoi'])) ?>
+                                Créé le <?= date('d/m/Y à H:i', strtotime($conv['date_creation'])) ?>
+                                <?php if (!empty($conv['date_dernier_message'])): ?>
+                                    • Dernier message: <?= date('d/m/Y à H:i', strtotime($conv['date_dernier_message'])) ?>
+                                <?php endif; ?>
                             </p>
                         </div>
                         <div class="flex flex-col items-end space-y-2">
-                            <?php if (!empty($msg['reponse_admin'])): ?>
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
-                                    Réponse de l'Admin
-                                </span>
-                            <?php elseif (!$msg['lu']): ?>
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                    Non lu par l'Admin
-                                </span>
-                            <?php else: ?>
-                                <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    Lu par l'Admin
-                                </span>
-                            <?php endif; ?>
+                            <?php 
+                                $status_text = 'Statut inconnu';
+                                $status_class = 'bg-gray-100 text-gray-800';
+                                
+                                if ($conv['lu'] == 0) {
+                                    $status_text = 'Non lu par l\'admin';
+                                    $status_class = 'bg-red-100 text-red-800';
+                                } elseif ($conv['derniere_expediteur'] == 'utilisateur') {
+                                    $status_text = 'En attente de réponse';
+                                    $status_class = 'bg-yellow-100 text-yellow-800';
+                                } elseif ($conv['derniere_expediteur'] == 'admin') {
+                                    $status_text = 'Répondu (attente vôtre)';
+                                    $status_class = 'bg-blue-100 text-blue-800';
+                                }
+                            ?>
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full <?= $status_class ?>">
+                                <?= $status_text ?>
+                            </span>
                             
-                            <button onclick="openModal(<?= $msg['id_message'] ?>)"
+                            <button onclick="openModal(<?= $conv['id_conversation'] ?>)"
                                     class="text-indigo-600 hover:text-indigo-900 focus:outline-none text-sm font-medium">
-                                <i class="fas fa-eye mr-1"></i> Voir le détail
+                                <i class="fas fa-eye mr-1"></i> Voir la conversation
                             </button>
                         </div>
                     </div>
@@ -96,57 +113,78 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 
-    <!-- Modales pour chaque message -->
-    <?php foreach ($messages as $msg): ?>
-    <div id="messageModal<?= $msg['id_message'] ?>" class="fixed inset-0 modal-overlay h-full w-full hidden z-50 overflow-y-auto" aria-labelledby="modal-title-<?= $msg['id_message'] ?>" role="dialog" aria-modal="true">
+    <!-- Modales pour chaque conversation -->
+    <?php foreach ($conversations as $conv): 
+        // Récupérer tous les messages de la conversation
+        $stmt_messages = $pdo->prepare("
+            SELECT id_message, role_expediteur, contenu, date_envoi 
+            FROM messages 
+            WHERE id_conversation = ? 
+            ORDER BY date_envoi ASC
+        ");
+        $stmt_messages->execute([$conv['id_conversation']]);
+        $messages = $stmt_messages->fetchAll(PDO::FETCH_ASSOC);
+    ?>
+    <div id="messageModal<?= $conv['id_conversation'] ?>" class="fixed inset-0 modal-overlay h-full w-full hidden z-50 overflow-y-auto" aria-labelledby="modal-title-<?= $conv['id_conversation'] ?>" role="dialog" aria-modal="true">
         <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
             <!-- Modal Header -->
             <div class="flex justify-between items-center p-4 border-b rounded-t bg-indigo-50 text-indigo-800">
-                <h3 class="text-xl font-semibold" id="modal-title-<?= $msg['id_message'] ?>">
-                    <i class="fas fa-comment-dots mr-2"></i> <?= htmlspecialchars($msg['sujet']) ?>
+                <h3 class="text-xl font-semibold" id="modal-title-<?= $conv['id_conversation'] ?>">
+                    <i class="fas fa-comment-dots mr-2"></i> <?= htmlspecialchars($conv['sujet']) ?>
                 </h3>
-                <button type="button" onclick="closeModal(<?= $msg['id_message'] ?>)" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                <button type="button" onclick="closeModal(<?= $conv['id_conversation'] ?>)" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <!-- Modal Body -->
-            <div class="p-6">
-                <p class="text-sm text-gray-500 mb-4">Envoyé le <?= date('d/m/Y à H:i', strtotime($msg['date_envoi'])) ?></p>
-
-                <!-- Message de l'utilisateur -->
-                <h4 class="text-lg font-semibold mb-2 text-gray-700">Votre message :</h4>
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 whitespace-pre-wrap">
-                    <?= nl2br(htmlspecialchars($msg['message'])) ?>
-                </div>
-
-                <!-- Réponse de l'administrateur -->
-                <h4 class="text-lg font-semibold mb-2 text-gray-700">Réponse de l'administrateur :</h4>
-                <?php if (!empty($msg['reponse_admin'])): ?>
-                    <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 mb-6">
-                        <p class="text-sm text-gray-600 mb-2">Répondu le <?= date('d/m/Y à H:i', strtotime($msg['date_reponse'])) ?></p>
-                        <div class="text-gray-800 whitespace-pre-wrap">
-                            <?= nl2br(htmlspecialchars($msg['reponse_admin'])) ?>
+            <div class="p-6 max-h-96 overflow-y-auto">
+                <!-- Conversation style fil de discussion -->
+                <div class="space-y-4">
+                    <?php foreach ($messages as $msg): ?>
+                        <?php 
+                            $is_user = ($msg['role_expediteur'] === 'utilisateur');
+                            $bg_class = $is_user ? 'bg-indigo-50 border-l-4 border-indigo-500' : 'bg-blue-50 border-l-4 border-blue-500';
+                            $icon = $is_user ? 'fa-user-circle' : 'fa-user-shield';
+                            $icon_color = $is_user ? 'text-indigo-600' : 'text-blue-600';
+                            $sender_name = $is_user ? 'Vous' : 'Administrateur';
+                        ?>
+                        <div class="p-4 rounded-lg <?= $bg_class ?>">
+                            <div class="flex items-center mb-2">
+                                <i class="fas <?= $icon ?> <?= $icon_color ?> mr-2"></i>
+                                <span class="font-semibold text-gray-700"><?= $sender_name ?></span>
+                                <span class="text-xs text-gray-500 ml-auto">
+                                    <?= date('d/m/Y à H:i', strtotime($msg['date_envoi'])) ?>
+                                </span>
+                            </div>
+                            <div class="text-gray-800 whitespace-pre-wrap break-words">
+                                <?= nl2br(htmlspecialchars($msg['contenu'])) ?>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Formulaire de suivi (Réponse à la réponse de l'admin) -->
-                    <h4 class="text-lg font-semibold mb-2 text-gray-700">Répondre à l'administrateur :</h4>
-                    <form onsubmit="sendFollowUp(event, <?= $msg['id_message'] ?>)" class="space-y-4">
-                        <textarea id="follow-up-<?= $msg['id_message'] ?>" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="Écrivez votre message de suivi ici..."></textarea>
-                        <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                            <i class="fas fa-paper-plane mr-1"></i> Envoyer le suivi
-                        </button>
-                    </form>
+                    <?php endforeach; ?>
 
-                <?php else: ?>
-                    <div class="bg-yellow-50 p-4 rounded-lg border border-yellow-200 mb-6 text-gray-700">
-                        L'administrateur n'a pas encore répondu à ce message.
-                    </div>
-                <?php endif; ?>
+                    <!-- Formulaire pour répondre si le dernier message est de l'admin -->
+                    <?php 
+                        $last_message = end($messages);
+                        if ($last_message && $last_message['role_expediteur'] === 'admin'): 
+                    ?>
+                        <div class="bg-white p-4 rounded-lg border-2 border-dashed border-gray-300 mt-4">
+                            <h4 class="text-lg font-semibold mb-3 text-gray-700 flex items-center">
+                                <i class="fas fa-reply mr-2 text-indigo-600"></i>
+                                Répondre à l'administrateur
+                            </h4>
+                            <form onsubmit="sendFollowUp(event, <?= $conv['id_conversation'] ?>)" class="space-y-4">
+                                <textarea id="follow-up-<?= $conv['id_conversation'] ?>" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500" placeholder="Écrivez votre réponse ici..."></textarea>
+                                <button type="submit" class="text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                    <i class="fas fa-paper-plane mr-1"></i> Envoyer la réponse
+                                </button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
             <!-- Modal Footer -->
             <div class="flex items-center p-4 border-t rounded-b justify-end">
-                <button type="button" onclick="closeModal(<?= $msg['id_message'] ?>)" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Fermer</button>
+                <button type="button" onclick="closeModal(<?= $conv['id_conversation'] ?>)" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Fermer</button>
             </div>
         </div>
     </div>
@@ -156,80 +194,71 @@ $messages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <script>
 // Fonctions pour gérer l'ouverture et la fermeture des modales (Tailwind CSS)
-function openModal(id_message) {
-    const modal = document.getElementById(`messageModal${id_message}`);
+function openModal(id_conversation) {
+    const modal = document.getElementById(`messageModal${id_conversation}`);
     if (modal) {
         modal.classList.remove('hidden');
         // Ajoute un écouteur pour fermer la modale en cliquant en dehors
         modal.onclick = function(event) {
             if (event.target === modal) {
-                closeModal(id_message);
+                closeModal(id_conversation);
             }
         };
     }
 }
 
-function closeModal(id_message) {
-    const modal = document.getElementById(`messageModal${id_message}`);
+function closeModal(id_conversation) {
+    const modal = document.getElementById(`messageModal${id_conversation}`);
     if (modal) {
         modal.classList.add('hidden');
         modal.onclick = null; // Supprime l'écouteur
     }
 }
 
-function sendFollowUp(event, id_message) {
-    event.preventDefault(); // Empêche l'envoi du formulaire par défaut
+function sendFollowUp(event, id_conversation) {
+    event.preventDefault();
 
-    const followUpTextarea = document.getElementById(`follow-up-${id_message}`);
+    const followUpTextarea = document.getElementById(`follow-up-${id_conversation}`);
     const followUp = followUpTextarea.value.trim();
 
     if (followUp.length < 5) {
-        alert("Veuillez écrire un message de suivi d'au moins 5 caractères.");
+        alert("Veuillez écrire une réponse d'au moins 5 caractères.");
         return;
     }
 
-    if (!confirm("Confirmez-vous l'envoi de ce message de suivi ?")) {
+    if (!confirm("Confirmez-vous l'envoi de cette réponse ?")) {
         return;
     }
 
-    // Nous allons utiliser un nouveau script AJAX pour les messages de suivi
-    // ou réutiliser le script de contact initial si vous en avez un.
-    // Pour l'instant, je vais simuler l'envoi et vous demander de créer le script côté serveur.
-    
-    // NOTE: Vous devrez créer un script côté serveur (ex: ../Contact/contact_submit.php)
-    // pour traiter ce message de suivi comme un NOUVEAU message de contact
-    // (ou un message lié au précédent si vous voulez une vraie conversation).
-    
-    // Pour simplifier, nous allons le traiter comme un nouveau message de contact
-    // en utilisant l'ID du message précédent dans le sujet pour le suivi.
-    
-    // Pour le moment, je vais juste vous donner la structure JS.
-    
-    alert("Fonctionnalité d'envoi de suivi non implémentée côté serveur. Veuillez créer le script de traitement.");
-    
-    // Exemple de ce à quoi ressemblerait l'appel AJAX pour un nouveau message :
-    /*
-    fetch('../Contact/contact_submit.php', { // Chemin à adapter
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Envoi en cours...';
+
+    fetch('contact_reply.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'sujet=' + encodeURIComponent('SUIVI Message #' + id_message) + '&message=' + encodeURIComponent(followUp)
+        body: 'id_conversation=' + encodeURIComponent(id_conversation) + '&message=' + encodeURIComponent(followUp)
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Message de suivi envoyé avec succès !');
+            alert('Votre réponse a été envoyée avec succès !');
             location.reload();
         } else {
             alert('Erreur d\'envoi : ' + (data.message || 'Une erreur inconnue est survenue.'));
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
     })
     .catch(err => {
         console.error('Erreur AJAX :', err);
         alert('Erreur de connexion. Réessayez plus tard.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
     });
-    */
 }
 
 </script>
