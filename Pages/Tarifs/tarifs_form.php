@@ -208,4 +208,8 @@ loadTarifs();
 </script>
 
 </body>
+<<<<<<< Updated upstream
 </html>
+=======
+</html>
+>>>>>>> Stashed changes

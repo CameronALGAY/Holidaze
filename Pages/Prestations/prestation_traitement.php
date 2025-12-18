@@ -1,5 +1,5 @@
 <?php
-require_once '../../include/db.php';
+require_once(__DIR__ . '/../../include/db.php');
 require_once 'prestation_class.php';
 
 class PrestationController {

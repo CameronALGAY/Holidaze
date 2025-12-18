@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
-require_once '../../includes/db.php';
-require_once '../Prestations/prestation_traitement.php';
+require_once '../include/db.php';
+require_once '../Pages/Prestations/prestation_traitement.php';
 
 $controller = new PrestationController($pdo);
 $response = ['success' => false, 'message' => ''];
@@ -41,7 +41,15 @@ try {
 
             case 'search':
                 $search = $_GET['search'] ?? '';
-                $prestations = $controller->searchPrestations($search);
+                
+                // Si la recherche est vide ou contient uniquement des %, afficher tout
+                $cleanSearch = trim(str_replace('%', '', $search));
+                if (empty($cleanSearch)) {
+                    $prestations = $controller->getAllPrestations();
+                } else {
+                    $prestations = $controller->searchPrestations($search);
+                }
+                
                 $response = ['success' => true, 'data' => $prestations];
                 break;
 
@@ -63,7 +71,7 @@ try {
                     break;
                 }
 
-                // Vérifier si la prestation existe déjà
+                // Vérifier si la prestation existe déjà 
                 $existing = $controller->getByLibelle($libelle_prestation);
                 if ($existing) {
                     $response['message'] = 'Cette prestation existe déjà';

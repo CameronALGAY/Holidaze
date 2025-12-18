@@ -1,7 +1,7 @@
 <?php
 
-include_once '../Bien/bien_class.php';
-include_once '../Saison/saison_class.php';
+include_once __DIR__ . '/../Bien/bien_class.php';
+include_once __DIR__ . '/../Saison/saison_class.php';
 
 class Tarifs
 {
