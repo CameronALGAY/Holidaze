@@ -1,16 +1,16 @@
 <?php
 // mes-favoris.php
 session_start();
-require_once __DIR__ . '/../include/db.php';
-require_once __DIR__ . '/Favoris/favoris_class.php';
+require_once dirname(dirname(__DIR__)) . '/include/db.php';
+require_once __DIR__ . '/favoris_class.php';
 
 // Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['id_user'])) {
-    header('Location: ../Pages/User/login.php');
+if (!isset($_SESSION['utilisateur_id'])) {
+    header('Location: ../Formulaires/connexion.php');
     exit;
 }
 
-$idUser = $_SESSION['id_user'];
+$idUser = $_SESSION['utilisateur_id'];
 $favorisController = new FavorisController($pdo);
 
 // Récupérer tous les favoris
@@ -62,7 +62,7 @@ $nbFavoris = count($favoris);
 </head>
 <body class="font-sans text-gray-800 bg-gray-50 antialiased">
 
-    <?php include 'header.php'; ?>
+    <?php include '../header.php'; ?>
 
     <!-- HEADER SECTION -->
     <section class="bg-gradient-to-br from-pink-600 to-purple-700 text-white py-16 px-4">
@@ -114,7 +114,7 @@ $nbFavoris = count($favoris);
                             <i class="fas fa-heart text-xl"></i>
                         </button>
 
-                        <a href="../Pages/Bien/bien_detail.php?id=<?= $bien['id_bien'] ?>" class="flex flex-col h-full">
+                        <a href="../Bien/bien_detail.php?id=<?= $bien['id_bien'] ?>" class="flex flex-col h-full">
                             <!-- Image -->
                             <div class="listing-image relative h-48 bg-gray-200 overflow-hidden">
                                 <?php if ($firstPhoto): ?>
@@ -210,7 +210,7 @@ $nbFavoris = count($favoris);
                 <p class="text-gray-600 mb-8 max-w-md mx-auto">
                     Commencez à explorer nos locations et ajoutez vos coups de cœur en cliquant sur l'icône cœur
                 </p>
-                <a href="../Pages/index.php" 
+                <a href="../index.php" 
                    class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-800 transition shadow-lg">
                     <i class="fas fa-search"></i>
                     Découvrir les locations
@@ -221,7 +221,7 @@ $nbFavoris = count($favoris);
     </div>
 
     <!-- FOOTER -->
-    <?php include 'footer.php'; ?>
+    <?php include '../footer.php'; ?>
 
     <script>
         function retirerFavori(idBien) {

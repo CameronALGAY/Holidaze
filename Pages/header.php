@@ -178,7 +178,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <?php if (!empty($_SESSION['utilisateur_id'])): ?>
                 <!-- Icônes -->
                 <div class="d-flex align-items-center fs-5">
-                    <a href="#" class="text-dark me-3"><i class="bi bi-heart"></i></a>
+                    <a href="/Pages/Favoris/mes-favoris.php" class="text-dark me-3"><i class="bi bi-heart"></i></a>
                     
                     <!-- Menu déroulant profil -->
                     <div class="profile-dropdown">

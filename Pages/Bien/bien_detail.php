@@ -138,8 +138,8 @@ $prestations = $stmtPrestations->fetchAll(PDO::FETCH_ASSOC);
 
 $favorisController = new FavorisController($pdo);
 $estEnFavori = false;
-if (isset($_SESSION['id_user'])) {
-    $estEnFavori = $favorisController->estEnFavori($_SESSION['id_user'], $id_bien);
+if (isset($_SESSION['utilisateur_id'])) {
+    $estEnFavori = $favorisController->estEnFavori($_SESSION['utilisateur_id'], $id_bien);
 }
 ?>
 
@@ -306,41 +306,32 @@ if (isset($_SESSION['id_user'])) {
                     <h1 class="text-4xl font-bold text-purple-600">
                         <?= htmlspecialchars($bien['nom_bien']) ?>
                     </h1>
-                    <?php if ($canEdit): ?>
-                        <div class="flex gap-3">
-                            <a href="bien_form.php?edit=<?= $id_bien ?>" 
-                               class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition flex items-center gap-2">
-                                <i class="fas fa-edit"></i>
-                                <span>Modifier</span>
-                            </a>
-                            <button onclick="deleteBien(<?= $id_bien ?>)" 
-                                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
-                                <i class="fas fa-trash"></i>
-                                <span>Supprimer</span>
+                    <div class="flex gap-3 items-center">
+                        <?php if (isset($_SESSION['utilisateur_id'])): ?>
+                            <button 
+                                id="btn-favori"
+                                onclick="toggleFavori(<?= $id_bien ?>)"
+                                class="heart-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg <?= $estEnFavori ? 'actif' : '' ?>">
+                                <i class="<?= $estEnFavori ? 'fas' : 'far' ?> fa-heart text-xl"></i>
+                                <span id="favori-text"><?= $estEnFavori ? 'Retirer des favoris' : 'Ajouter aux favoris' ?></span>
                             </button>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                        <?php if ($canEdit): ?>
+                            <div class="flex gap-3">
+                                <a href="bien_form.php?edit=<?= $id_bien ?>" 
+                                   class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition flex items-center gap-2">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Modifier</span>
+                                </a>
+                                <button onclick="deleteBien(<?= $id_bien ?>)" 
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Supprimer</span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-
-            <div class="flex items-center gap-4 mb-4">
-    <h1 class="text-3xl font-bold"><?= htmlspecialchars($bien['nom_bien']) ?></h1>
-    
-    <?php if (isset($_SESSION['id_user'])): ?>
-        <button 
-            id="btn-favori"
-            onclick="toggleFavori(<?= $id_bien ?>)"
-            class="heart-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg">
-            <i class="fas fa-heart text-xl"></i>
-            <span id="favori-text"><?= $estEnFavori ? 'Retirer des favoris' : 'Ajouter aux favoris' ?></span>
-        </button>
-    <?php else: ?>
-        <a href="../Formulaires/connexion.php" 
-           class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
-            <i class="far fa-heart text-xl"></i>
-            <span>Connectez-vous pour sauvegarder</span>
-        </a>
-    <?php endif; ?>
-</div>
 
                 <!-- Grille de photos style Airbnb -->
                 <div class="relative rounded-2xl overflow-hidden shadow-xl mb-8 photo-grid">
@@ -1196,16 +1187,19 @@ function toggleFavori(idBien) {
     const text = document.getElementById('favori-text');
     const icon = btn.querySelector('i');
     
+    // Déterminer l'action basée sur l'état courant
+    const action = estEnFavori ? 'retirer' : 'ajouter';
+    
     // Animation immédiate
     icon.style.transform = 'scale(1.3)';
     setTimeout(() => icon.style.transform = 'scale(1)', 300);
     
-    fetch('../Pages/favoris_action.php', {
+    fetch('../favoris_action.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'action=toggle&id_bien=' + idBien
+        body: 'action=' + action + '&id_bien=' + idBien
     })
     .then(response => response.json())
     .then(data => {
