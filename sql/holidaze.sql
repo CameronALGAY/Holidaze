@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 18, 2025 at 10:37 AM
+-- Generation Time: Dec 18, 2025 at 03:47 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.26
 
@@ -66,11 +66,11 @@ CREATE TABLE `bien` (
 --
 
 INSERT INTO `bien` (`id_bien`, `nom_bien`, `rue_bien`, `cp_bien`, `latitude_bien`, `longitude_bien`, `com_bien`, `superficie_bien`, `description_bien`, `animaux_bien`, `nb_couchage`, `id_commune`, `id_typebien`, `id_utilisateur_proprietaire`, `valide`) VALUES
-(37, 'Test', '21 Route De Bellevue', '', 45.30461800, 1.40553800, '', '200', 'ojhsdflsjdflh', '0', '5', 6932, 2, 6, 1),
-(38, 'maison', '1 Square Cap Horizon', '', 45.17364100, 1.52392500, '', '200', 'test', '0', '3', 6911, 2, 6, 1),
-(39, 'test', '21 Route De Bellevue', '', NULL, NULL, '', '300', 'test', '1', '5', 6932, 2, 6, 1),
-(40, 'ah', '21 Route De Bellevue', '', 0.00000000, 0.00000000, '', '300', 'ah', '1', '4', 6932, 3, 6, 1),
-(41, 'chez moi', '21 Route De Bellevue', '', 45.30461800, 1.40553800, '', '200', 'oui', '0', '6', 6932, 3, 6, 1);
+(37, 'Maison sur coline', 'Piece de Salles', '', 46.83179300, 1.68508200, '', '200', 'Une villa sur le mont d\'une coline', '0', '5', 13856, 2, 6, 1),
+(38, 'Maison en campagne', 'Arnac', '', 45.98156700, 0.97501500, '', '200', 'Une petite maison en pierre', '0', '3', 34805, 2, 6, 1),
+(39, 'Maison en lotissement', 'Avenue de Bordeaux', '', 43.18148300, 2.98033800, '', '300', 'Un maison luxueuse', '0', '5', 3849, 2, 6, 1),
+(40, 'Chalet de luxe', '1 Square Cap Horizon', '', 45.17364100, 1.52392500, '', '300', 'Un chalet luxueux dans la forêt', '1', '4', 6911, 2, 6, 1),
+(41, 'Villa luxueuse', '21 Route De Bellevue', '', 45.30461800, 1.40553800, '', '200', 'oui', '0', '6', 6932, 3, 6, 1);
 
 -- --------------------------------------------------------
 
@@ -37011,7 +37011,10 @@ CREATE TABLE `conversations` (
 --
 
 INSERT INTO `conversations` (`id_conversation`, `id_utilisateur`, `sujet`, `date_creation`, `statut`, `supprime`, `lu`) VALUES
-(1, 15, 'test', '2025-12-18 11:05:41', 'ouvert', 0, 1);
+(1, 15, 'test', '2025-12-18 11:05:41', 'ouvert', 0, 1),
+(15, 15, 'Test Subject', '2025-12-18 11:43:09', 'test', 1, 0),
+(16, 15, 'zertyu', '2025-12-18 11:43:42', 'en attente admin', 1, 1),
+(17, 6, 'i<sdmfhskjhf', '2025-12-18 11:53:06', 'en attente utilisateur', 1, 1);
 
 -- --------------------------------------------------------
 
@@ -37049,6 +37052,16 @@ CREATE TABLE `favoris` (
   `id_bien` int NOT NULL,
   `date_ajout` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `favoris`
+--
+
+INSERT INTO `favoris` (`id_favori`, `id_utilisateur`, `id_bien`, `date_ajout`) VALUES
+(3, 15, 37, '2025-12-18 14:53:36'),
+(4, 15, 38, '2025-12-18 14:54:59'),
+(6, 6, 41, '2025-12-18 14:57:11'),
+(7, 6, 39, '2025-12-18 15:03:35');
 
 -- --------------------------------------------------------
 
@@ -37095,33 +37108,13 @@ CREATE TABLE `messages` (
   `date_envoi` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- --------------------------------------------------------
-
 --
--- Table structure for table `messages_contact_old`
+-- Dumping data for table `messages`
 --
 
-CREATE TABLE `messages_contact_old` (
-  `id_message` int NOT NULL,
-  `id_utilisateur` int NOT NULL,
-  `sujet` varchar(100) NOT NULL,
-  `message` text NOT NULL,
-  `reponse_admin` text,
-  `reponse_utilisateur` text,
-  `date_reponse` datetime DEFAULT NULL,
-  `date_reponse_utilisateur` datetime DEFAULT NULL,
-  `ferme` tinyint(1) NOT NULL DEFAULT '0',
-  `supprime` tinyint(1) NOT NULL DEFAULT '0',
-  `date_envoi` datetime NOT NULL,
-  `lu` tinyint(1) DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `messages_contact_old`
---
-
-INSERT INTO `messages_contact_old` (`id_message`, `id_utilisateur`, `sujet`, `message`, `reponse_admin`, `reponse_utilisateur`, `date_reponse`, `date_reponse_utilisateur`, `ferme`, `supprime`, `date_envoi`, `lu`) VALUES
-(4, 15, 'test', 'mdg*ZµGHµzgeZHEGzgehzumegegmizegmuozegmozegzoefgmzgefzemfuzmefozegfz!meofuvzmgiezgefmzgfemizgefz', 'ojzdfimjsdfsmdf', NULL, '2025-12-18 11:07:27', NULL, 0, 0, '2025-12-18 11:05:41', 1);
+INSERT INTO `messages` (`id_message`, `id_conversation`, `role_expediteur`, `contenu`, `date_envoi`) VALUES
+(7, 17, 'utilisateur', 'sjhdkmjfhskdjfhkjshfd', '2025-12-18 11:53:06'),
+(8, 17, 'admin', 'jsdkjfsdhfj', '2025-12-18 11:53:17');
 
 -- --------------------------------------------------------
 
@@ -37145,15 +37138,17 @@ INSERT INTO `photo` (`id_photo`, `nom_photo`, `lien_photo`, `id_bien`) VALUES
 (62, 'a3b27af4-39bf-4187-b074-ca9592ddb1bd.jpg', 'Photo/uploads/bien_693ad76649b979.81598437.jpg', 37),
 (63, 'amenagement-interieur-conseils-et-solutions-00.jpg', 'Photo/uploads/bien_693ad7664bd967.35753832.jpg', 37),
 (64, 'image_0_0.jpg', 'Photo/uploads/bien_693ad7664dcdd0.56157287.jpg', 37),
-(65, 'IMG_0989.JPG', 'Photo/uploads/bien_693ae5aaf0c840.85154603.jpg', 38),
-(66, '07666a3406d56e9ad4854353b998aa9e.jpg', 'Photo/uploads/bien_693aebe92c8765.25014358.jpg', 38),
-(67, 'a3b27af4-39bf-4187-b074-ca9592ddb1bd.jpg', 'Photo/uploads/bien_693aebe92d1cc3.07905921.jpg', 38),
-(68, 'amenagement-interieur-conseils-et-solutions-00.jpg', 'Photo/uploads/bien_693aebe92de581.67433375.jpg', 38),
-(69, 'IMG_1207.jpg', 'Photo/uploads/bien_69400befc942d4.92616661.jpg', 39),
-(70, 'IMG_1035.jpg', 'Photo/uploads/bien_694014a4e51533.48547117.jpg', 40),
 (71, '07666a3406d56e9ad4854353b998aa9e.jpg', 'Photo/uploads/bien_6940151e9057a8.61553547.jpg', 41),
 (72, 'a3b27af4-39bf-4187-b074-ca9592ddb1bd.jpg', 'Photo/uploads/bien_6940151e910778.26078664.jpg', 41),
-(73, 'amenagement-interieur-conseils-et-solutions-00.jpg', 'Photo/uploads/bien_6940151e9195f0.06411383.jpg', 41);
+(73, 'amenagement-interieur-conseils-et-solutions-00.jpg', 'Photo/uploads/bien_6940151e9195f0.06411383.jpg', 41),
+(74, 'istockphoto-1516938158-612x612.jpg', 'Photo/uploads/bien_69441fcdcb3251.41056665.jpg', 40),
+(75, 'Chalet-en-bois-habitable-100m2-exterieur-Holiday-L', 'Photo/uploads/bien_69441fcdcbdfa3.95799522.jpg', 40),
+(76, 'appartement-chalet-moderne-3d.jpg', 'Photo/uploads/bien_69441fcdcca273.42996866.jpg', 40),
+(77, 'téléchargement (1).jpg', 'Photo/uploads/bien_694420962aaba0.93762849.jpg', 39),
+(78, 'pexels-photo-106399.jpeg', 'Photo/uploads/bien_694420962b46f3.42446174.jpeg', 39),
+(79, 'istockphoto-1456467041-612x612.jpg', 'Photo/uploads/bien_6944213fe1fa68.21110833.jpg', 38),
+(80, 'istockphoto-1824615178-612x612.jpg', 'Photo/uploads/bien_6944213fe24f50.75790621.jpg', 38),
+(81, 'istockphoto-471826199-612x612.jpg', 'Photo/uploads/bien_6944213fe2a306.42256285.jpg', 38);
 
 -- --------------------------------------------------------
 
@@ -37248,6 +37243,9 @@ INSERT INTO `secompose` (`id_bien`, `id_prestation`, `quantite`) VALUES
 (39, 7, 1),
 (39, 8, 3),
 (40, 5, 1),
+(40, 6, 1),
+(40, 7, 1),
+(40, 8, 2),
 (41, 6, 1),
 (41, 8, 1);
 
@@ -37277,7 +37275,8 @@ INSERT INTO `tarif` (`id_tarif`, `semaine_tarif`, `annee_tarif`, `tarif`, `id_bi
 (27, '50', '2025', '25', 38, 7),
 (28, '51', '2025', '300', 39, 3),
 (29, '51', '2025', '200', 40, 3),
-(30, '51', '2025', '120', 41, 3);
+(30, '51', '2025', '120', 41, 3),
+(31, '52', '2025', '300', 40, 3);
 
 -- --------------------------------------------------------
 
@@ -37419,13 +37418,6 @@ ALTER TABLE `messages`
   ADD KEY `id_conversation` (`id_conversation`);
 
 --
--- Indexes for table `messages_contact_old`
---
-ALTER TABLE `messages_contact_old`
-  ADD PRIMARY KEY (`id_message`),
-  ADD KEY `id_utilisateur` (`id_utilisateur`);
-
---
 -- Indexes for table `photo`
 --
 ALTER TABLE `photo`
@@ -37509,7 +37501,7 @@ ALTER TABLE `commune`
 -- AUTO_INCREMENT for table `conversations`
 --
 ALTER TABLE `conversations`
-  MODIFY `id_conversation` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id_conversation` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `entreprises`
@@ -37521,7 +37513,7 @@ ALTER TABLE `entreprises`
 -- AUTO_INCREMENT for table `favoris`
 --
 ALTER TABLE `favoris`
-  MODIFY `id_favori` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id_favori` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `locataire`
@@ -37533,19 +37525,13 @@ ALTER TABLE `locataire`
 -- AUTO_INCREMENT for table `messages`
 --
 ALTER TABLE `messages`
-  MODIFY `id_message` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `messages_contact_old`
---
-ALTER TABLE `messages_contact_old`
-  MODIFY `id_message` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_message` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `photo`
 --
 ALTER TABLE `photo`
-  MODIFY `id_photo` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id_photo` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
 
 --
 -- AUTO_INCREMENT for table `prestation`
@@ -37569,7 +37555,7 @@ ALTER TABLE `saison`
 -- AUTO_INCREMENT for table `tarif`
 --
 ALTER TABLE `tarif`
-  MODIFY `id_tarif` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id_tarif` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `type_bien`
@@ -37633,12 +37619,6 @@ ALTER TABLE `locataire`
 --
 ALTER TABLE `messages`
   ADD CONSTRAINT `messages_ibfk_1` FOREIGN KEY (`id_conversation`) REFERENCES `conversations` (`id_conversation`) ON DELETE CASCADE;
-
---
--- Constraints for table `messages_contact_old`
---
-ALTER TABLE `messages_contact_old`
-  ADD CONSTRAINT `messages_contact_old_ibfk_1` FOREIGN KEY (`id_utilisateur`) REFERENCES `utilisateurs` (`id_utilisateur`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `photo`
