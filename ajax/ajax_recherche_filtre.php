@@ -1,18 +1,25 @@
 <?php
-// ajax/ajax_recherche_filtre.php
-
+/**
+ * AJAX RECHERCHE AVANCÉE (appelé par index.php JS)
+ * - Filtres : commune (nom/CP/dept), type_bien, prix min/max, prestations
+ * - JSON response : count + biens (photo, prix_min, note_moyenne)
+ * - Requêtes subqueries optimisées (1ère photo, min tarif, AVG notes)
+ * - WHERE dynamique + LIKE/IN préparés (sécurisé)
+ */
 header('Content-Type: application/json; charset=utf-8');
-require_once '../include/db.php';
+require_once '../include/db.php';  // $pdo
 
-$search      = trim($_GET['commune'] ?? '');  // La saisie utilisateur (nom, CP, dept)
-$type        = trim($_GET['type'] ?? '');
+// Récupère + nettoie params GET (depuis index.php)
+$search      = trim($_GET['commune'] ?? '');  // Ville/CP/dept
+$type        = trim($_GET['type'] ?? '');     // Type bien
 $prix_min    = $_GET['prix_min'] !== '' ? (float)$_GET['prix_min'] : null;
 $prix_max    = $_GET['prix_max'] !== '' ? (float)$_GET['prix_max'] : null;
 $prestations = isset($_GET['prestations']) 
     ? (is_array($_GET['prestations']) ? $_GET['prestations'] : [$_GET['prestations']]) 
     : [];
-$prestations = array_filter($prestations);
+$prestations = array_filter($prestations);    // Nettoie vides
 
+// Requête de base (biens + infos essentielles)
 $sql = "
     SELECT DISTINCT 
         b.id_bien,
@@ -30,27 +37,29 @@ $sql = "
     LEFT JOIN type_bien tb ON b.id_typebien = tb.id_typebien
     LEFT JOIN secompose sc ON b.id_bien = sc.id_bien
     WHERE 1=1
-";
+    AND b.valide = 1";
 
-$params = [];
+$params = [];  // Params pour prepared stmt
 
+// FILTRE COMMUNE (3 cas intelligents)
 if ($search !== '') {
-    // Cas 1 : Code postal complet (ex: 75008)
-    if (preg_match('/^\d{5}$/', $search)) {
+    // 1. CP exact (75008)
+    if (preg_match('/^\\d{5}$/', $search)) {
         $sql .= " AND c.cp_commune = ?";
         $params[] = $search;
     }
-    // Cas 2 : Département (ex: 75, 690, 13, 2A, 971)
-    elseif (preg_match('/^\d{1,3}$/', $search) || preg_match('/^[0-9]{2}[A-B]$/', $search)) {
+    // 2. Dépt (75, 69, 2A...)
+    elseif (preg_match('/^\\d{1,3}$/', $search) || preg_match('/^[0-9]{2}[A-B]$/', $search)) {
         $sql .= " AND c.cp_commune LIKE ?";
         $params[] = $search . '%';
     }
-    // Cas 3 : Nom de commune (ex: Paris, Lyon, Bellevu...)
+    // 3. Nom ville partiel
     else {
         $sql .= " AND c.nom_commune LIKE ?";
         $params[] = '%' . $search . '%';
     }
 }
+
 
 // Type de bien
 if ($type !== '') {

@@ -1,65 +1,25 @@
 <?php
-session_start();
+/**
+ * PAGE D'ACCUEIL PRINCIPALE
+ * - Charge tous biens validés via BiensController
+ * - Filtres rapides + recherche AJAX avancée
+ * - Autocomplétion communes API geo.api.gouv.fr
+ * - Cards biens avec notes/nouveau/animaux/prix
+ */
+session_start();  // Démarre session utilisateur
 
-// Chemin absolu vers la racine → marche partout
-$root = realpath(__DIR__ . '/../') . '/';
-require_once '../include/db.php';
-require 'Bien/bien_class.php';
-require 'Communes/communes_class.php';
-require 'TypeBien/typebien_class.php';
-require  'Tarifs/tarifs_class.php';
-$controller = new BiensController($pdo);
+// Chemin racine projet (portable)
+$root = realpath(__DIR__ . '/../') . '/';  
+require_once '../include/db.php';           // Connexion PDO $pdo
+require 'Bien/bien_class.php';             // CRUD biens
+require 'Communes/communes_class.php';     // Communes
+require 'TypeBien/typebien_class.php';     // Types biens
+require  'Tarifs/tarifs_class.php';        // Tarifs/saisons
+$controller = new BiensController($pdo);   // Contrôleur biens
 
-// SEULEMENT LES BIENS VALIDÉS
-$biens = $controller->getAllBiens();
+// Précharge TOUS biens validés pour stats/filtres (optionnel)
+$biens = $controller->getAllBiens();       // Appel méthode commentée
 
-// === DESTINATIONS POPULAIRES ===
-// Liste des grandes villes pour les destinations populaires
-$villesMajeurs = ['Paris', 'Lyon', 'Marseille', 'Bordeaux', 'Toulouse', 'Nice', 'Nantes', 'Strasbourg', 'Montpellier', 'Lille', 'Angers', 'Grenoble'];
-
-// Mapping des images pour chaque grande ville 
-$imagesVilles = [
-    'Paris' => '../Photo/villes/paris.jpg',
-    'Lyon' => '../Photo/villes/lyon.jpg',
-    'Marseille' => '../Photo/villes/marseille.jpg',
-    'Bordeaux' => '../Photo/villes/bordeaux.jpg',
-    'Toulouse' => '../Photo/villes/toulouse.jpg',
-    'Nice' => '../Photo/villes/nice.jpg',
-    'Nantes' => '../Photo/villes/nantes.jpg',
-    'Strasbourg' => '../Photo/villes/strasbourg.jpg',
-    'Montpellier' => '../Photo/villes/montpellier.jpeg',
-    'Lille' => '../Photo/villes/lille.jpg',
-    'Angers' => '../Photo/villes/angers.jpg',
-    'Grenoble' => '../Photo/villes/grenoble.jpg',
-];
-
-// Compter les biens par commune et garder uniquement les grandes villes
-$communesUniques = [];
-foreach ($biens as $b) {
-    $commune = $b['nom_commune'] ?? 'Inconnue';
-    
-    // Filtrer uniquement les grandes villes
-    if (!in_array($commune, $villesMajeurs)) {
-        continue;
-    }
-    
-    $cp = $b['cp_commune'] ?? '';
-    $key = $commune . '_' . $cp;
-    $communesUniques[$key] ??= ['nom' => $commune, 'cp' => $cp, 'count' => 0];
-    $communesUniques[$key]['count']++;
-}
-
-uasort($communesUniques, fn($a,$b) => $b['count'] - $a['count']);
-$topCommunes = array_slice($communesUniques, 0, 4, true);
-
-if (empty($topCommunes)) {
-    $topCommunes = [
-        ['nom' => 'Paris',     'cp' => '75000', 'count' => 0],
-        ['nom' => 'Lyon',      'cp' => '69000', 'count' => 0],
-        ['nom' => 'Marseille', 'cp' => '13000', 'count' => 0],
-        ['nom' => 'Bordeaux',  'cp' => '33000', 'count' => 0],
-    ];
-}
 ?>
 
 <!DOCTYPE html>
@@ -97,24 +57,7 @@ if (empty($topCommunes)) {
         </div>
     </section>
 
-<!-- DESTINATIONS POPULAIRES -->
-<section class="max-w-7xl mx-auto px-6 py-16">
-    <h2 class="text-4xl font-bold text-center mb-12">Destinations populaires</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <?php foreach ($topCommunes as $c):
-            $img = $imagesVilles[$c['nom']] ?? "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800";
-        ?>
-            <a href="../recherche.php?destination=<?= urlencode($c['nom']) ?>" class="rounded-2xl overflow-hidden shadow-xl relative h-80">
-                <img src="<?= $img ?>" alt="<?= htmlspecialchars($c['nom']) ?>" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70"></div>
-                <div class="absolute bottom-8 left-8 text-white">
-                    <h3 class="text-3xl font-bold"><?= htmlspecialchars($c['nom']) ?></h3>
-                    <p><?= $c['count'] ?> location<?= $c['count'] > 1 ? 's' : '' ?></p>
-                </div>
-            </a>
-        <?php endforeach; ?>
-    </div>
-</section>
+
 
 <!-- RECHERCHE AVANCÉE + LISTE -->
 <section class="max-w-7xl mx-auto px-6 py-12">
