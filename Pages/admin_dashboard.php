@@ -336,27 +336,25 @@ $utilisateur_nom = $_SESSION['prenom'] . ' ' . ($_SESSION['nom'] ?? '') ?: 'Admi
 	
 	        </div>
 	        <!-- Modal Footer -->
-	        <div class="flex items-center p-4 border-t rounded-b justify-between space-x-3">
+	        <div class="flex items-center p-4 border-t rounded-b justify-center gap-3 flex-wrap">
 	            <button type="button" onclick="deleteMessage(<?= $id_conv ?>)" class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
 	                <i class="fas fa-trash-alt mr-1"></i> Supprimer la conversation
 	            </button>
-	            <div class="flex space-x-3">
-	                <?php if (!$is_closed): ?>
-	                <button type="button" onclick="closeConversation(<?= $id_conv ?>)" class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-	                    <i class="fas fa-lock mr-1"></i> Fermer la conversation
-	                </button>
-	                <?php else: ?>
-	                <button type="button" onclick="openConversation(<?= $id_conv ?>)" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-	                    <i class="fas fa-lock-open mr-1"></i> Rouvrir la conversation
-	                </button>
-	                <?php endif; ?>
-	                <?php if (!$conv['lu']): ?>
-	                <button id="mark-read-btn-<?= $id_conv ?>" type="button" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" onclick="marquerCommeLu(<?= $id_conv ?>)">
-	                    <i class="fas fa-check-circle mr-1"></i> Marquer comme lu
-	                </button>
-	                <?php endif; ?>
-	                <button type="button" onclick="closeModal(<?= $id_conv ?>)" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Fermer</button>
-	            </div>
+	            <?php if (!$is_closed): ?>
+	            <button type="button" onclick="closeConversation(<?= $id_conv ?>)" class="text-white bg-gray-600 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+	                <i class="fas fa-lock mr-1"></i> Fermer la conversation
+	            </button>
+	            <?php else: ?>
+	            <button type="button" onclick="openConversation(<?= $id_conv ?>)" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+	                <i class="fas fa-lock-open mr-1"></i> Rouvrir la conversation
+	            </button>
+	            <?php endif; ?>
+	            <?php if (!$conv['lu']): ?>
+	            <button id="mark-read-btn-<?= $id_conv ?>" type="button" class="text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center" onclick="marquerCommeLu(<?= $id_conv ?>)">
+	                <i class="fas fa-check-circle mr-1"></i> Marquer comme lu
+	            </button>
+	            <?php endif; ?>
+	            <button type="button" onclick="closeModal(<?= $id_conv ?>)" class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10">Fermer</button>
 	        </div>
 	    </div>
 	</div>

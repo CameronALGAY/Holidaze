@@ -161,7 +161,7 @@ if (empty($topCommunes)) {
             </div>
         </div>
         <div class="text-right mt-8">
-            <button id="reset-filters" class="text-blue-600 font-bold text-lg hover:underline">Réinitialiser</button>
+            <button id="reset-filters" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Réinitialiser</button>
         </div>
     </div>
 
@@ -276,23 +276,33 @@ function load() {
 
                 data.biens.forEach(b => {
                     const photo = b.premiere_photo_lien ? '/' + b.premiere_photo_lien : 'https://via.placeholder.com/600x400.png?text=Photo';
+                    
+                    // Vérifier si le bien est nouveau (moins de 7 jours)
+                    let isNew = false;
+                    if (b.date_creation) {
+                        const dateCreation = new Date(b.date_creation);
+                        const maintenant = new Date();
+                        const joursEcoules = (maintenant - dateCreation) / (1000 * 60 * 60 * 24);
+                        isNew = joursEcoules < 7;
+                    }
+                    
                     const note = b.note_moyenne 
-                        ? `<div class="absolute top-4 right-4 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-bold"><i class="fas fa-star text-yellow-400"></i> ${b.note_moyenne} (${b.nb_avis})</div>`
-                        : '<div class="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2 rounded-full text-sm font-bold">Nouveau</div>';
-                    const animaux = b.animaux_bien == 1 ? '<div class="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm">Animaux OK</div>' : '';
+                        ? `<div class="absolute top-3 right-3 bg-white/95 backdrop-blur text-gray-900 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg"><i class="fas fa-star text-yellow-400"></i> ${b.note_moyenne} (${b.nb_avis})</div>`
+                        : (isNew ? '<div class="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg">Nouveau</div>' : '');
+                    const animaux = b.animaux_bien == 1 ? '<div class="absolute top-3 left-3 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg"><i class="fas fa-paw"></i> Animaux OK</div>' : '';
                     const prix = b.prix_min_nuit ? `<p class="text-3xl font-bold text-blue-600">€${Math.round(b.prix_min_nuit)} <span class="text-lg font-normal text-gray-600">/nuit</span></p>` : '<p class="text-gray-500 italic">Prix sur demande</p>';
 
                     container.innerHTML += `
-                    <a href="Bien/bien_detail.php?id=${b.id_bien}" class="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition hover:-translate-y-3">
+                    <a href="Bien/bien_detail.php?id=${b.id_bien}" class="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition hover:-translate-y-3 no-underline">
                         <div class="relative h-64">
                             <img src="${photo}" class="w-full h-full object-cover">
                             ${note}${animaux}
                         </div>
                         <div class="p-8">
-                            <h3 class="text-2xl font-bold mb-2">${b.nom_bien}</h3>
-                            <p class="text-gray-600 flex items-center gap-2"><i class="fas fa-map-marker-alt"></i> ${b.nom_commune}</p>
+                            <h3 class="text-2xl font-bold mb-2 no-underline">${b.nom_bien}</h3>
+                            <p class="text-gray-600 flex items-center gap-2 no-underline"><i class="fas fa-map-marker-alt"></i> ${b.nom_commune}</p>
                             ${prix}
-                            <div class="flex gap-4 text-sm text-gray-600 mt-4">
+                            <div class="flex gap-4 text-sm text-gray-600 mt-4 no-underline">
                                 <span>${b.superficie_bien} m²</span>
                                 <span>${b.nb_couchage} couchages</span>
                                 <span>${b.des_typebien}</span>

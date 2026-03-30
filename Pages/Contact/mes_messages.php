@@ -39,7 +39,7 @@ $conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Messages - Holidaze</title>
+    <title>Messages - Holidaze</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -55,7 +55,7 @@ $conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <main class="max-w-4xl mx-auto mt-10 bg-white shadow-md rounded-lg p-6">
     <h1 class="text-3xl font-bold mb-6 flex items-center">
-        <i class="fas fa-envelope mr-3 text-indigo-600"></i> Mes Messages
+        <i class="fas fa-envelope mr-3 text-indigo-600"></i> Messages
     </h1>
 
     <?php if (empty($conversations)): ?>

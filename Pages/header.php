@@ -147,6 +147,14 @@ if (session_status() === PHP_SESSION_NONE) {
             background-color: #fee2e2;
             color: #dc2626;
         }
+        .heart-icon {
+            transition: all 0.2s ease;
+        }
+        .heart-icon:hover {
+            color: #ec4899 !important;
+            text-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -163,7 +171,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 <li class="nav-item"><a class="nav-link" href="/Pages/Bien/bien_form.php">Louer</a></li>
 
                 <?php if (isset($_SESSION['utilisateur_id'])): ?>
-                <li class="nav-item"><a class="nav-link" href="/Pages/Mes_Reservations/mes_reservations.php">Mes Réservations</a></li>
+                <li class="nav-item"><a class="nav-link" href="/Pages/Mes_Reservations/mes_reservations.php">Réservations</a></li>
                 <?php endif; ?>
                 
                 <li class="nav-item"><a class="nav-link" href="/Pages/Carte/carte.php">Carte</a></li>
@@ -178,7 +186,7 @@ if (session_status() === PHP_SESSION_NONE) {
             <?php if (!empty($_SESSION['utilisateur_id'])): ?>
                 <!-- Icônes -->
                 <div class="d-flex align-items-center fs-5">
-                    <a href="/Pages/Favoris/mes-favoris.php" class="text-dark me-3"><i class="bi bi-heart"></i></a>
+                    <a href="/Pages/Favoris/mes-favoris.php" class="text-dark me-3"><i class="bi bi-heart heart-icon"></i></a>
                     
                     <!-- Menu déroulant profil -->
                     <div class="profile-dropdown">
@@ -206,12 +214,12 @@ if (session_status() === PHP_SESSION_NONE) {
                             
 	                            <a href="/Pages/Profil/profil.php" class="dropdown-item-custom">
 	                                <i class="bi bi-person"></i>
-	                                Mon profil
+	                                Profil
 	                            </a>
 	                            
 	                            <a href="/Pages/Contact/mes_messages.php" class="dropdown-item-custom">
 	                                <i class="bi bi-envelope"></i>
-	                                Mes Messages
+	                                Messages
 	                            </a>
                             
                             <?php if (!empty($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
