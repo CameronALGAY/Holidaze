@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../include/db.php'; // Assurez-vous que le chemin vers votre base de données est correct
+require_once '../../include/smtp_mail.php';
 
 $message = "";
 $message_type = ""; // 'success' ou 'error'
@@ -28,20 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $update_stmt = $pdo->prepare("UPDATE utilisateurs SET reset_token = ?, token_expiry = ? WHERE id_utilisateur = ?");
         $update_stmt->execute([$token, $expires_at, $utilisateur['id_utilisateur']]);
 
-        // Construire le lien de réinitialisation
-        // Remplacez 'http://votre-site.com' par l'URL de base de votre application
-        $reset_link = "http://votre-site.com/Pages/reinitialiser_mdp.php?email=" . urlencode($email) . "&token=" . $token;
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host_name = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $reset_link = $scheme . '://' . $host_name . '/Pages/Formulaires/reinitialiser_mdp.php?email=' . urlencode($email) . '&token=' . $token;
 
-        // --- SIMULATION D'ENVOI D'EMAIL ---
-        // En production, vous utiliseriez une librairie comme PHPMailer ici.
-        
-        // $sujet = "Réinitialisation de votre mot de passe";
-        // $corps_email = "Veuillez cliquer sur ce lien pour réinitialiser votre mot de passe : " . $reset_link;
-        // mail($email, $sujet, $corps_email, "From: support@votre-site.com");
+        $sujet = 'Réinitialisation de votre mot de passe';
+        $corps_email = "Bonjour,\n\n";
+        $corps_email .= "Nous avons reçu une demande de réinitialisation de mot de passe pour votre compte Holidaze.\n\n";
+        $corps_email .= "Cliquez sur ce lien pour définir un nouveau mot de passe :\n" . $reset_link . "\n\n";
+        $corps_email .= "Ce lien expire dans 1 heure. Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer ce message.\n";
 
-        // Message de succès affiché à l'utilisateur
-        $message = "Si cette adresse e-mail existe dans notre système, un lien de réinitialisation de mot de passe vous a été envoyé. Vérifiez votre boîte de réception (et vos spams).";
-        $message_type = "success";
+        if (!sendSmtpMail($email, $sujet, $corps_email)) {
+            $message = "Le lien a été préparé, mais l'envoi du mail a échoué. Vérifie le serveur SMTP local.";
+            $message_type = "error";
+        } else {
+            $message = "Si cette adresse e-mail existe dans notre système, un lien de réinitialisation de mot de passe vous a été envoyé. Vérifiez votre boîte de réception (et vos spams).";
+            $message_type = "success";
+        }
         
     } else {
         // Pour des raisons de sécurité, nous donnons un message générique même si l'email n'existe pas.

@@ -19,4 +19,3 @@ try {
     die('Erreur connexion DB: ' . $e->getMessage());  // Arrêt fatal si échec
 }
 ?>
-

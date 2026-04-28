@@ -83,6 +83,21 @@ $utilisateur_nom = $_SESSION['prenom'] . ' ' . ($_SESSION['nom'] ?? '') ?: 'Admi
                 <h2 class="text-xl font-semibold text-indigo-800">Gestion des utilisateurs</h2>
                 <p class="mt-2 text-gray-600">Gérez les comptes utilisateurs et leurs rôles.</p>
             </a>
+
+			<!-- Gestion des ménages -->  
+			<a href="/Pages/Menages/menages_form.php" class="block p-6 bg-indigo-100 rounded-lg shadow hover:bg-indigo-200 transition">
+			    <h2 class="text-xl font-semibold text-indigo-800">Gestion des ménages</h2>
+			    <p class="mt-2 text-gray-600">Planifiez les ménages par réservation et assignez-les aux intervenants.
+			    </p>
+			</a>
+
+			<!-- Gestion des intervenants -->  
+			<a href="/Pages/Intervenants/intervenants_form.php" class="block p-6 bg-indigo-100 rounded-lg shadow hover:bg-indigo-200 transition">
+			    <h2 class="text-xl font-semibold text-indigo-800">Gestion des intervenants</h2>
+			    <p class="mt-2 text-gray-600">Gérer les intervenants pour un ménage dans une location.
+			    </p>
+			</a>
+
         </div>
 
     <!-- Validation des biens -->
