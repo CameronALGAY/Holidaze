@@ -1,38 +1,25 @@
 <?php
-session_start();
+/**
+ * PAGE D'ACCUEIL PRINCIPALE
+ * - Charge tous biens validés via BiensController
+ * - Filtres rapides + recherche AJAX avancée
+ * - Autocomplétion communes API geo.api.gouv.fr
+ * - Cards biens avec notes/nouveau/animaux/prix
+ */
+session_start();  // Démarre session utilisateur
 
-// Chemin absolu vers la racine → marche partout
-$root = realpath(__DIR__ . '/../') . '/';
-require_once '../include/db.php';
-require 'Bien/bien_class.php';
-require 'Communes/communes_class.php';
-require 'TypeBien/typebien_class.php';
-require  'Tarifs/tarifs_class.php';
-$controller = new BiensController($pdo);
+// Chemin racine projet (portable)
+$root = realpath(__DIR__ . '/../') . '/';  
+require_once '../include/db.php';           // Connexion PDO $pdo
+require 'Bien/bien_class.php';             // CRUD biens
+require 'Communes/communes_class.php';     // Communes
+require 'TypeBien/typebien_class.php';     // Types biens
+require  'Tarifs/tarifs_class.php';        // Tarifs/saisons
+$controller = new BiensController($pdo);   // Contrôleur biens
 
-// SEULEMENT LES BIENS VALIDÉS
-$biens = $controller->getAllBiens();
+// Précharge TOUS biens validés pour stats/filtres (optionnel)
+$biens = $controller->getAllBiens();       // Appel méthode commentée
 
-// === DESTINATIONS POPULAIRES ===
-$communesUniques = [];
-foreach ($biens as $b) {
-    $commune = $b['nom_commune'] ?? 'Inconnue';
-    $cp = $b['cp_commune'] ?? '';
-    $key = $commune . '_' . $cp;
-    $communesUniques[$key] ??= ['nom' => $commune, 'cp' => $cp, 'count' => 0];
-    $communesUniques[$key]['count']++;
-}
-uasort($communesUniques, fn($a,$b) => $b['count'] - $a['count']);
-$topCommunes = array_slice($communesUniques, 0, 4, true);
-
-if (empty($topCommunes)) {
-    $topCommunes = [
-        ['nom' => 'Paris',     'cp' => '75000', 'count' => 0],
-        ['nom' => 'Lyon',      'cp' => '69000', 'count' => 0],
-        ['nom' => 'Marseille', 'cp' => '13000', 'count' => 0],
-        ['nom' => 'Bordeaux',  'cp' => '33000', 'count' => 0],
-    ];
-}
 ?>
 
 <!DOCTYPE html>
@@ -70,26 +57,7 @@ if (empty($topCommunes)) {
         </div>
     </section>
 
-<!-- DESTINATIONS POPULAIRES -->
-<section class="max-w-7xl mx-auto px-6 py-16">
-    <h2 class="text-4xl font-bold text-center mb-12">Destinations populaires</h2>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        <?php foreach ($topCommunes as $c):
-            $img = file_exists("../Photo/villes/" . strtolower(str_replace(' ', '-', $c['nom'])) . ".jpg")
-                ? "../Photo/villes/" . strtolower(str_replace(' ', '-', $c['nom'])) . ".jpg"
-                : "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=800";
-        ?>
-            <a href="../recherche.php?destination=<?= urlencode($c['nom']) ?>" class="rounded-2xl overflow-hidden shadow-xl relative h-80">
-                <img src="<?= $img ?>" alt="<?= htmlspecialchars($c['nom']) ?>" class="w-full h-full object-cover">
-                <div class="absolute inset-0 bg-gradient-to-t from-black/70"></div>
-                <div class="absolute bottom-8 left-8 text-white">
-                    <h3 class="text-3xl font-bold"><?= htmlspecialchars($c['nom']) ?></h3>
-                    <p><?= $c['count'] ?> location<?= $c['count'] > 1 ? 's' : '' ?></p>
-                </div>
-            </a>
-        <?php endforeach; ?>
-    </div>
-</section>
+
 
 <!-- RECHERCHE AVANCÉE + LISTE -->
 <section class="max-w-7xl mx-auto px-6 py-12">
@@ -136,7 +104,7 @@ if (empty($topCommunes)) {
             </div>
         </div>
         <div class="text-right mt-8">
-            <button id="reset-filters" class="text-blue-600 font-bold text-lg hover:underline">Réinitialiser</button>
+            <button id="reset-filters" class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition">Réinitialiser</button>
         </div>
     </div>
 
@@ -251,23 +219,33 @@ function load() {
 
                 data.biens.forEach(b => {
                     const photo = b.premiere_photo_lien ? '/' + b.premiere_photo_lien : 'https://via.placeholder.com/600x400.png?text=Photo';
+                    
+                    // Vérifier si le bien est nouveau (moins de 7 jours)
+                    let isNew = false;
+                    if (b.date_creation) {
+                        const dateCreation = new Date(b.date_creation);
+                        const maintenant = new Date();
+                        const joursEcoules = (maintenant - dateCreation) / (1000 * 60 * 60 * 24);
+                        isNew = joursEcoules < 7;
+                    }
+                    
                     const note = b.note_moyenne 
-                        ? `<div class="absolute top-4 right-4 bg-black/80 text-white px-4 py-2 rounded-full text-sm font-bold"><i class="fas fa-star text-yellow-400"></i> ${b.note_moyenne} (${b.nb_avis})</div>`
-                        : '<div class="absolute top-4 right-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-5 py-2 rounded-full text-sm font-bold">Nouveau</div>';
-                    const animaux = b.animaux_bien == 1 ? '<div class="absolute top-4 left-4 bg-green-600 text-white px-4 py-2 rounded-full text-sm">Animaux OK</div>' : '';
+                        ? `<div class="absolute top-3 right-3 bg-white/95 backdrop-blur text-gray-900 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg"><i class="fas fa-star text-yellow-400"></i> ${b.note_moyenne} (${b.nb_avis})</div>`
+                        : (isNew ? '<div class="absolute top-3 right-3 bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg">Nouveau</div>' : '');
+                    const animaux = b.animaux_bien == 1 ? '<div class="absolute top-3 left-3 bg-green-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold shadow-lg"><i class="fas fa-paw"></i> Animaux OK</div>' : '';
                     const prix = b.prix_min_nuit ? `<p class="text-3xl font-bold text-blue-600">€${Math.round(b.prix_min_nuit)} <span class="text-lg font-normal text-gray-600">/nuit</span></p>` : '<p class="text-gray-500 italic">Prix sur demande</p>';
 
                     container.innerHTML += `
-                    <a href="Bien/bien_detail.php?id=${b.id_bien}" class="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition hover:-translate-y-3">
+                    <a href="Bien/bien_detail.php?id=${b.id_bien}" class="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition hover:-translate-y-3 no-underline">
                         <div class="relative h-64">
                             <img src="${photo}" class="w-full h-full object-cover">
                             ${note}${animaux}
                         </div>
                         <div class="p-8">
-                            <h3 class="text-2xl font-bold mb-2">${b.nom_bien}</h3>
-                            <p class="text-gray-600 flex items-center gap-2"><i class="fas fa-map-marker-alt"></i> ${b.nom_commune}</p>
+                            <h3 class="text-2xl font-bold mb-2 no-underline">${b.nom_bien}</h3>
+                            <p class="text-gray-600 flex items-center gap-2 no-underline"><i class="fas fa-map-marker-alt"></i> ${b.nom_commune}</p>
                             ${prix}
-                            <div class="flex gap-4 text-sm text-gray-600 mt-4">
+                            <div class="flex gap-4 text-sm text-gray-600 mt-4 no-underline">
                                 <span>${b.superficie_bien} m²</span>
                                 <span>${b.nb_couchage} couchages</span>
                                 <span>${b.des_typebien}</span>

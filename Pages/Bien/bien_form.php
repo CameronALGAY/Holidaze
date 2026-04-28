@@ -25,6 +25,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
 <title>Gestion des biens</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
     .photo-upload-section {
         text-align: center;
@@ -189,14 +190,14 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
         <!-- Bouton pour afficher le sous-formulaire PRESTATIONS -->
         <div class="md:col-span-2">
             <button type="button" id="togglePrestations" class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:bg-indigo-600 w-full mb-2">
-                🛠️ Gérer les prestations du bien
+                <i class="fas fa-tools"></i> Gérer les prestations du bien
             </button>
         </div>
 
         <!-- Sous-formulaire PRESTATIONS -->
         <div id="prestationsForm" class="hidden md:col-span-2 border p-4 rounded-lg bg-indigo-50">
             <h3 class="text-lg font-semibold mb-4">
-                <i class="bi bi-gear"></i> Prestations incluses
+                <i class="fas fa-cog"></i> Prestations incluses
             </h3>
             
             <!-- Recherche de prestations -->
@@ -231,7 +232,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                                    placeholder="Qté">
                             <button type="button" onclick="removePrestation(this)" 
                                     class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                                <i class="bi bi-trash"></i>
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     <?php endforeach; ?>
@@ -247,22 +248,22 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
         <!-- Bouton pour afficher le sous-formulaire PHOTO -->
         <div class="md:col-span-2">
             <button type="button" id="togglePhoto" class="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 w-full mb-2">
-                📷 Gérer les photos du bien
+                <i class="fas fa-camera"></i> Gérer les photos du bien
             </button>
         </div>
 
         <!-- Sous-formulaire PHOTO amélioré -->
         <div id="photoForm" class="hidden md:col-span-2 border p-4 rounded-lg bg-purple-50">
             <h3 class="text-lg font-semibold mb-4">
-                <i class="bi bi-images"></i> Photos du bien
+                <i class="fas fa-images"></i> Photos du bien
             </h3>
             
             <div class="photo-upload-section">
-                <i class="bi bi-cloud-upload" style="font-size: 48px; color: #a855f7;"></i>
+                <i class="fas fa-cloud-upload-alt" style="font-size: 48px; color: #a855f7;"></i>
                 <p class="text-gray-600 mt-2 mb-3">Cliquez pour ajouter des photos</p>
                 
                 <label for="photo_input" class="inline-block bg-purple-500 text-white px-6 py-2 rounded-lg cursor-pointer hover:bg-purple-600 transition">
-                    <i class="bi bi-upload me-2"></i>Choisir des photos
+                    <i class="fas fa-upload me-2"></i>Choisir des photos
                 </label>
                 <input type="file" id="photo_input" name="photos[]" accept="image/*" multiple onchange="previewImages(this)">
                 <p class="text-sm text-gray-500 mt-2">JPG, PNG ou GIF. Max 5 Mo par fichier</p>
@@ -284,7 +285,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                                     <button type="button" class="photo-delete-btn" 
                                             onclick="deleteExistingPhoto(<?= $p['id_photo'] ?>, this)"
                                             title="Supprimer cette photo">
-                                        <i class="bi bi-trash"></i>
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             <?php endforeach; ?>
@@ -299,7 +300,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
         <!-- Bouton pour afficher le sous-formulaire TARIF -->
         <div class="md:col-span-2">
             <button type="button" id="toggleTarif" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 w-full mb-2">
-                💰 Ajouter un tarif pour ce bien
+                <i class="fas fa-dollar-sign"></i> Ajouter un tarif pour ce bien
             </button>
         </div>
 
@@ -331,14 +332,14 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
 
         <div class="md:col-span-2">
             <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 w-full">
-                <?= $editId ? '💾 Modifier le bien' : '➕ Ajouter un bien' ?>
+                <?= $editId ? '<i class="fas fa-save"></i> Modifier le bien' : '<i class="fas fa-plus"></i> Ajouter un bien' ?>
             </button>
         </div>
     </form>
 
     <!-- Liste des biens (ADMIN UNIQUEMENT) -->
     <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
-    <h2 class="text-xl font-semibold mt-6 mb-2">📋 Liste de tous les biens (Admin)</h2>
+    <h2 class="text-xl font-semibold mt-6 mb-2"><i class="fas fa-list"></i> Liste de tous les biens (Admin)</h2>
     <div class="border rounded-lg p-4 bg-gray-50">
         <?php if ($biens && count($biens) > 0): ?>
             <?php foreach ($biens as $b): ?>
@@ -394,7 +395,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                         </div>
                         
                         <div class="flex gap-2 mt-2">
-                            <a href="bien_form.php?edit=<?= $b['id_bien'] ?>" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️</a>
+                            <a href="bien_form.php?edit=<?= $b['id_bien'] ?>" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"><i class="fas fa-edit"></i></a>
                             <a href="#" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                                onclick="if(confirm('Voulez-vous vraiment supprimer ce bien ?')) {
                                    fetch('bien_traitement.php', {
@@ -402,7 +403,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                                        headers: {'Content-Type':'application/x-www-form-urlencoded'},
                                        body: 'action=delete&id_bien=<?= $b['id_bien'] ?>'
                                    }).then(()=> window.location='bien_form.php');
-                               }">🗑️</a>
+                               }"><i class="fas fa-trash"></i></a>
                         </div>
                     </div>
                 </div>

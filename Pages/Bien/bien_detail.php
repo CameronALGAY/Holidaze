@@ -138,8 +138,8 @@ $prestations = $stmtPrestations->fetchAll(PDO::FETCH_ASSOC);
 
 $favorisController = new FavorisController($pdo);
 $estEnFavori = false;
-if (isset($_SESSION['id_user'])) {
-    $estEnFavori = $favorisController->estEnFavori($_SESSION['id_user'], $id_bien);
+if (isset($_SESSION['utilisateur_id'])) {
+    $estEnFavori = $favorisController->estEnFavori($_SESSION['utilisateur_id'], $id_bien);
 }
 ?>
 
@@ -260,7 +260,7 @@ if (isset($_SESSION['id_user'])) {
         /* Animation de chargement */
         .loading-spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #7c3aed;
+            border-top: 3px solid #2563eb;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -273,14 +273,13 @@ if (isset($_SESSION['id_user'])) {
         }
 
         .heart-btn {
-            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
             color: white;
         }
         .heart-btn:hover {
             transform: translateY(-2px);
         }
         .heart-btn.actif {
-            background: linear-gradient(135deg, #f43f5e 0%, #c026d3 100%);
+            background: linear-gradient(135deg, #be185d 0%, #831843 100%) !important;
         }
         .heart-btn.actif i {
             animation: heartBeat 0.3s ease;
@@ -303,44 +302,34 @@ if (isset($_SESSION['id_user'])) {
             <div>
                 <!-- En-tête avec titre et boutons d'édition -->
                 <div class="flex justify-between items-start mb-6 flex-wrap gap-4">
-                    <h1 class="text-4xl font-bold text-purple-600">
+                    <h1 class="text-4xl font-bold" style="color: #2563eb;">
                         <?= htmlspecialchars($bien['nom_bien']) ?>
                     </h1>
-                    <?php if ($canEdit): ?>
-                        <div class="flex gap-3">
-                            <a href="bien_form.php?edit=<?= $id_bien ?>" 
-                               class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition flex items-center gap-2">
-                                <i class="fas fa-edit"></i>
-                                <span>Modifier</span>
-                            </a>
-                            <button onclick="deleteBien(<?= $id_bien ?>)" 
-                                    class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
-                                <i class="fas fa-trash"></i>
-                                <span>Supprimer</span>
+                    <div class="flex gap-3 items-center">
+                        <?php if (isset($_SESSION['utilisateur_id'])): ?>
+                            <button 
+                                id="btn-favori"
+                                onclick="toggleFavori(<?= $id_bien ?>)"
+                                class="heart-btn flex items-center justify-center w-12 h-12 rounded-full font-semibold transition-all shadow-md hover:shadow-lg <?= $estEnFavori ? 'actif' : '' ?>" style="background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);" title="<?= $estEnFavori ? 'Retirer des favoris' : 'Ajouter aux favoris' ?>">
+                                <i class="<?= $estEnFavori ? 'fas' : 'far' ?> fa-heart text-2xl text-white"></i>
                             </button>
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                        <?php if ($canEdit): ?>
+                            <div class="flex gap-3">
+                                <a href="bien_form.php?edit=<?= $id_bien ?>" 
+                                   class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition flex items-center gap-2 no-underline">
+                                    <i class="fas fa-edit"></i>
+                                    <span>Modifier</span>
+                                </a>
+                                <button onclick="deleteBien(<?= $id_bien ?>)" 
+                                        class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center gap-2">
+                                    <i class="fas fa-trash"></i>
+                                    <span>Supprimer</span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-
-            <div class="flex items-center gap-4 mb-4">
-    <h1 class="text-3xl font-bold"><?= htmlspecialchars($bien['nom_bien']) ?></h1>
-    
-    <?php if (isset($_SESSION['id_user'])): ?>
-        <button 
-            id="btn-favori"
-            onclick="toggleFavori(<?= $id_bien ?>)"
-            class="heart-btn flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg">
-            <i class="fas fa-heart text-xl"></i>
-            <span id="favori-text"><?= $estEnFavori ? 'Retirer des favoris' : 'Ajouter aux favoris' ?></span>
-        </button>
-    <?php else: ?>
-        <a href="../Formulaires/connexion.php" 
-           class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition">
-            <i class="far fa-heart text-xl"></i>
-            <span>Connectez-vous pour sauvegarder</span>
-        </a>
-    <?php endif; ?>
-</div>
 
                 <!-- Grille de photos style Airbnb -->
                 <div class="relative rounded-2xl overflow-hidden shadow-xl mb-8 photo-grid">
@@ -417,40 +406,40 @@ if (isset($_SESSION['id_user'])) {
                 <!-- Détails du bien -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
                     <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                        <i class="fas fa-info-circle text-purple-600"></i>
+                        <i class="fas fa-info-circle" style="color: #2563eb;"></i>
                         Détails du bien
                     </h2>
                     <div class="grid md:grid-cols-2 gap-4 text-lg">
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-map-marker-alt text-purple-600"></i>
+                            <i class="fas fa-map-marker-alt" style="color: #2563eb;"></i>
                             <div>
                                 <strong>Commune :</strong> 
                                 <?= htmlspecialchars($bien['nom_commune']) ?>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-home text-purple-600"></i>
+                            <i class="fas fa-home" style="color: #2563eb;"></i>
                             <div>
                                 <strong>Type :</strong> 
                                 <?= htmlspecialchars($bien['des_typebien']) ?>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-ruler-combined text-purple-600"></i>
+                            <i class="fas fa-ruler-combined" style="color: #2563eb;"></i>
                             <div>
                                 <strong>Superficie :</strong> 
                                 <?= number_format($bien['superficie_bien'], 0, ',', ' ') ?> m²
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-users text-purple-600"></i>
+                            <i class="fas fa-users" style="color: #2563eb;"></i>
                             <div>
                                 <strong>Couchages :</strong> 
                                 <?= $bien['nb_couchage'] ?> personne<?= $bien['nb_couchage'] > 1 ? 's' : '' ?>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
-                            <i class="fas fa-paw text-purple-600"></i>
+                            <i class="fas fa-paw" style="color: #2563eb;"></i>
                             <div>
                                 <strong>Animaux :</strong> 
                                 <?= $bien['animaux_bien'] == '1' ? 'Acceptés' : 'Refusés' ?>
@@ -471,7 +460,7 @@ if (isset($_SESSION['id_user'])) {
                 <!-- Prestations -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
                     <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                        <i class="fas fa-star text-purple-600"></i>
+                        <i class="fas fa-star" style="color: #2563eb;"></i>
                         Prestations
                     </h2>
                     <?php if (count($prestations) > 0): ?>
@@ -496,7 +485,7 @@ if (isset($_SESSION['id_user'])) {
                 <!-- Carte de localisation -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
                     <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                        <i class="fas fa-map text-purple-600"></i>
+                        <i class="fas fa-map" style="color: #2563eb;"></i>
                         Localisation approximative
                     </h2>
                     <div id="map" class="rounded-xl shadow-inner mb-4"></div>
@@ -512,7 +501,7 @@ if (isset($_SESSION['id_user'])) {
             <div class="lg:sticky lg:top-10 h-fit">
                 <div class="bg-white rounded-2xl shadow-lg p-8">
                     <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-                        <i class="fas fa-calendar-alt text-purple-600"></i>
+                        <i class="fas fa-calendar-alt" style="color: #2563eb;"></i>
                         Disponibilités et Réservation
                     </h2>
                     
@@ -526,7 +515,7 @@ if (isset($_SESSION['id_user'])) {
                             <p class="mt-2">Vous devez être connecté pour voir les disponibilités et réserver.</p>
                         </div>
                         <a href="../connexion.php" 
-                           class="w-full block text-center bg-purple-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2">
+                           class="w-full block text-center text-white font-bold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2" style="background-color: #2563eb;" onmouseover="this.style.backgroundColor='#1e40af'" onmouseout="this.style.backgroundColor='#2563eb'">
                             <i class="fas fa-sign-in-alt"></i>
                             <span>Se connecter</span>
                         </a>
@@ -555,7 +544,7 @@ if (isset($_SESSION['id_user'])) {
                         <!-- Section Tarifs par saison -->
                         <div class="mt-6 pt-6 border-t border-gray-200">
                             <h3 class="text-xl font-bold mb-4 flex items-center gap-2">
-                                <i class="fas fa-euro-sign text-purple-600"></i>
+                                <i class="fas fa-money-bill" style="color: #2563eb;"></i>
                                 Tarifs par Saison
                             </h3>
                             <?php if (count($tarifsBySaison) > 0): ?>
@@ -567,11 +556,11 @@ if (isset($_SESSION['id_user'])) {
                                                     <?= htmlspecialchars($saison['libelle']) ?>
                                                 </span>
                                                 <?php if ($saison['min_tarif'] == $saison['max_tarif']): ?>
-                                                    <span class="font-bold text-purple-600">
+                                                    <span class="font-bold" style="color: #2563eb;">
                                                         <?= number_format($saison['min_tarif'], 2, ',', ' ') ?> €
                                                     </span>
                                                 <?php else: ?>
-                                                    <span class="font-bold text-purple-600">
+                                                    <span class="font-bold" style="color: #2563eb;">
                                                         <?= number_format($saison['min_tarif'], 2, ',', ' ') ?> - 
                                                         <?= number_format($saison['max_tarif'], 2, ',', ' ') ?> €
                                                     </span>
@@ -610,13 +599,13 @@ if (isset($_SESSION['id_user'])) {
         <div class="bg-gray-50 rounded-lg p-4 mb-6">
             <div class="space-y-3">
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-calendar text-purple-600"></i>
+                    <i class="fas fa-calendar" style="color: #2563eb;"></i>
                     <p class="text-lg">
                         Période : <span id="modal-dates" class="font-bold"></span>
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <i class="fas fa-moon text-purple-600"></i>
+                    <i class="fas fa-moon" style="color: #2563eb;"></i>
                     <p class="text-lg">
                         Durée : <span id="modal-nights" class="font-bold text-green-600"></span> nuit<span id="modal-nights-plural">s</span>
                     </p>
@@ -624,7 +613,7 @@ if (isset($_SESSION['id_user'])) {
             </div>
             
             <div class="mt-4 pt-4 border-t border-gray-200">
-                <p class="text-xl font-bold text-purple-600 flex items-center gap-2">
+                <p class="text-xl font-bold flex items-center gap-2" style="color: #2563eb;">
                     <i class="fas fa-euro-sign"></i>
                     Prix total : <span id="modal-price">-</span> €
                 </p>
@@ -636,7 +625,7 @@ if (isset($_SESSION['id_user'])) {
 
         <div class="mb-6">
             <label class="block text-lg font-medium mb-2 flex items-center gap-2">
-                <i class="fas fa-users text-purple-600"></i>
+                <i class="fas fa-users" style="color: #2563eb;"></i>
                 Nombre de voyageurs
             </label>
             <input type="number" 
@@ -644,7 +633,7 @@ if (isset($_SESSION['id_user'])) {
                    min="1" 
                    max="<?= $bien['nb_couchage'] ?>" 
                    value="1"
-                   class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent">
+                   class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <p class="text-sm text-gray-500 mt-1">
                 Maximum : <?= $bien['nb_couchage'] ?> personne<?= $bien['nb_couchage'] > 1 ? 's' : '' ?>
             </p>
@@ -940,8 +929,8 @@ if (isset($_SESSION['id_user'])) {
 
         // Ajouter un cercle pour indiquer la zone approximative (confidentialité)
         L.circle([latitude, longitude], {
-            color: '#7c3aed',
-            fillColor: '#a78bfa',
+            color: '#2563eb',
+            fillColor: '#3b82f6',
             fillOpacity: 0.2,
             radius: 1500 // Rayon de 1.5km pour approximation
         }).addTo(map).bindPopup(`
@@ -1193,19 +1182,21 @@ if (isset($_SESSION['id_user'])) {
 
 function toggleFavori(idBien) {
     const btn = document.getElementById('btn-favori');
-    const text = document.getElementById('favori-text');
     const icon = btn.querySelector('i');
+    
+    // Déterminer l'action basée sur l'état courant
+    const action = estEnFavori ? 'retirer' : 'ajouter';
     
     // Animation immédiate
     icon.style.transform = 'scale(1.3)';
     setTimeout(() => icon.style.transform = 'scale(1)', 300);
     
-    fetch('../Pages/favoris_action.php', {
+    fetch('../favoris_action.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'action=toggle&id_bien=' + idBien
+        body: 'action=' + action + '&id_bien=' + idBien
     })
     .then(response => response.json())
     .then(data => {
@@ -1214,17 +1205,17 @@ function toggleFavori(idBien) {
             
             if (estEnFavori) {
                 btn.classList.add('actif');
-                text.textContent = 'Retirer des favoris';
                 icon.classList.remove('far');
                 icon.classList.add('fas');
+                btn.title = 'Retirer des favoris';
                 
                 // Notification succès
                 showNotification('✓ Ajouté aux favoris !', 'success');
             } else {
                 btn.classList.remove('actif');
-                text.textContent = 'Ajouter aux favoris';
                 icon.classList.remove('fas');
                 icon.classList.add('far');
+                btn.title = 'Ajouter aux favoris';
                 
                 showNotification('Retiré des favoris', 'info');
             }

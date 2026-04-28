@@ -12,18 +12,53 @@ $erreur = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $sujet = trim($_POST['sujet'] ?? '');
-    $message = trim($_POST['message'] ?? '');
+    $contenu = trim($_POST['message'] ?? '');
     
-    if (empty($sujet) || empty($message)) {
+    if (empty($sujet) || empty($contenu)) {
         $erreur = 'Veuillez remplir tous les champs.';
-    } elseif (strlen($message) < 10) {
+    } elseif (strlen($contenu) < 10) {
         $erreur = 'Votre message doit faire au moins 10 caractères.';
     } else {
         try {
-            $stmt = $pdo->prepare("INSERT INTO messages_contact (id_utilisateur, sujet, message, date_envoi) VALUES (?, ?, ?, NOW())");
-            $stmt->execute([$_SESSION['utilisateur_id'], $sujet, $message]);
+            // Début de la transaction
+            $pdo->beginTransaction();
+            
+            // 1. Créer une nouvelle conversation
+            $stmt_conv = $pdo->prepare("
+                INSERT INTO conversations (id_utilisateur, sujet, lu, supprime, date_creation, statut) 
+                VALUES (?, ?, 0, 0, NOW(), 'en attente admin')
+            ");
+            $stmt_conv->execute([$_SESSION['utilisateur_id'], $sujet]);
+            
+            $id_conversation = $pdo->lastInsertId();
+            
+            if (!$id_conversation) {
+                throw new Exception('Erreur lors de la création de la conversation.');
+            }
+            
+            // 2. Ajouter le message initial
+            $stmt_msg = $pdo->prepare("
+                INSERT INTO messages (id_conversation, role_expediteur, contenu, date_envoi) 
+                VALUES (?, 'utilisateur', ?, NOW())
+            ");
+            $stmt_msg->execute([$id_conversation, $contenu]);
+            
+            // Valider la transaction
+            $pdo->commit();
             $message_envoye = true;
+        } catch (PDOException $e) {
+            // Annuler la transaction en cas d'erreur
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('PDO Error contact.php: ' . $e->getMessage());
+            $erreur = 'Erreur lors de l\'envoi du message. Réessayez plus tard.';
         } catch (Exception $e) {
+            // Annuler la transaction en cas d'erreur
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('Erreur contact.php: ' . $e->getMessage());
             $erreur = 'Erreur lors de l\'envoi du message. Réessayez plus tard.';
         }
     }

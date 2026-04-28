@@ -13,7 +13,7 @@ class FavorisController {
      */
     public function ajouterFavori($idUser, $idBien) {
         try {
-            $sql = "INSERT INTO favoris (id_user, id_bien) VALUES (?, ?)";
+            $sql = "INSERT INTO favoris (id_utilisateur, id_bien) VALUES (?, ?)";
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([$idUser, $idBien]);
         } catch (PDOException $e) {
@@ -31,7 +31,7 @@ class FavorisController {
      */
     public function retirerFavori($idUser, $idBien) {
         try {
-            $sql = "DELETE FROM favoris WHERE id_user = ? AND id_bien = ?";
+            $sql = "DELETE FROM favoris WHERE id_utilisateur = ? AND id_bien = ?";
             $stmt = $this->pdo->prepare($sql);
             return $stmt->execute([$idUser, $idBien]);
         } catch (PDOException $e) {
@@ -45,7 +45,7 @@ class FavorisController {
      */
     public function estEnFavori($idUser, $idBien) {
         try {
-            $sql = "SELECT COUNT(*) FROM favoris WHERE id_user = ? AND id_bien = ?";
+            $sql = "SELECT COUNT(*) FROM favoris WHERE id_utilisateur = ? AND id_bien = ?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$idUser, $idBien]);
             return $stmt->fetchColumn() > 0;
@@ -68,9 +68,9 @@ class FavorisController {
                         f.date_ajout as date_favori
                     FROM favoris f
                     INNER JOIN bien b ON f.id_bien = b.id_bien
-                    LEFT JOIN communes c ON b.id_commune = c.id_commune
-                    LEFT JOIN typebien tb ON b.id_typebien = tb.id_typebien
-                    WHERE f.id_user = ?
+                    LEFT JOIN commune c ON b.id_commune = c.id_commune
+                    LEFT JOIN type_bien tb ON b.id_typebien = tb.id_typebien
+                    WHERE f.id_utilisateur = ?
                     ORDER BY f.date_ajout DESC";
             
             $stmt = $this->pdo->prepare($sql);
@@ -87,7 +87,7 @@ class FavorisController {
      */
     public function countFavorisByUser($idUser) {
         try {
-            $sql = "SELECT COUNT(*) FROM favoris WHERE id_user = ?";
+            $sql = "SELECT COUNT(*) FROM favoris WHERE id_utilisateur = ?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$idUser]);
             return (int)$stmt->fetchColumn();
@@ -117,7 +117,7 @@ class FavorisController {
      */
     public function getTarifsByBienId($idBien) {
         try {
-            $sql = "SELECT * FROM tarifs WHERE id_bien = ?";
+            $sql = "SELECT * FROM tarif WHERE id_bien = ?";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([$idBien]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);

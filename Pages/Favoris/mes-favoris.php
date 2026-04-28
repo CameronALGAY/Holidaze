@@ -1,16 +1,16 @@
 <?php
 // mes-favoris.php
 session_start();
-require_once __DIR__ . '/../include/db.php';
-require_once __DIR__ . '/Favoris/favoris_class.php';
+require_once dirname(dirname(__DIR__)) . '/include/db.php';
+require_once __DIR__ . '/favoris_class.php';
 
 // Vérifier si l'utilisateur est connecté
-if (!isset($_SESSION['id_user'])) {
-    header('Location: ../Pages/User/login.php');
+if (!isset($_SESSION['utilisateur_id'])) {
+    header('Location: ../Formulaires/connexion.php');
     exit;
 }
 
-$idUser = $_SESSION['id_user'];
+$idUser = $_SESSION['utilisateur_id'];
 $favorisController = new FavorisController($pdo);
 
 // Récupérer tous les favoris
@@ -23,7 +23,7 @@ $nbFavoris = count($favoris);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mes Favoris - Holidaze</title>
+    <title>Favoris - Holidaze</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="../Photo/icon.png" type="image/png">
@@ -62,14 +62,14 @@ $nbFavoris = count($favoris);
 </head>
 <body class="font-sans text-gray-800 bg-gray-50 antialiased">
 
-    <?php include 'header.php'; ?>
+    <?php include '../header.php'; ?>
 
     <!-- HEADER SECTION -->
     <section class="bg-gradient-to-br from-pink-600 to-purple-700 text-white py-16 px-4">
         <div class="max-w-6xl mx-auto">
             <div class="flex items-center gap-3 mb-4">
                 <i class="fas fa-heart text-4xl"></i>
-                <h1 class="text-4xl md:text-5xl font-bold">Mes Favoris</h1>
+                <h1 class="text-4xl md:text-5xl font-bold">Favoris</h1>
             </div>
             <p class="text-xl opacity-90">
                 <?php if ($nbFavoris > 0): ?>
@@ -110,11 +110,11 @@ $nbFavoris = count($favoris);
                         <!-- Bouton Retirer des favoris -->
                         <button 
                             onclick="retirerFavori(<?= $bien['id_bien'] ?>)"
-                            class="heart-btn absolute top-3 left-3 z-20 bg-white text-red-500 w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:bg-red-50">
+                            class="heart-btn absolute top-3 left-3 z-20 bg-white text-pink-500 w-10 h-10 rounded-full flex items-center justify-center shadow-lg hover:bg-pink-50">
                             <i class="fas fa-heart text-xl"></i>
                         </button>
 
-                        <a href="../Pages/Bien/bien_detail.php?id=<?= $bien['id_bien'] ?>" class="flex flex-col h-full">
+                        <a href="../Bien/bien_detail.php?id=<?= $bien['id_bien'] ?>" class="flex flex-col h-full no-underline">
                             <!-- Image -->
                             <div class="listing-image relative h-48 bg-gray-200 overflow-hidden">
                                 <?php if ($firstPhoto): ?>
@@ -127,7 +127,7 @@ $nbFavoris = count($favoris);
                                     </div>
                                 <?php endif; ?>
 
-                                <!-- Badge note -->
+                                <!-- Badge note ou Nouveau -->
                                 <?php if ($avgNote !== null): ?>
                                     <span class="badge-note absolute top-2 right-2 text-white px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1">
                                         <i class="fas fa-star text-yellow-400 text-sm"></i>
@@ -137,9 +137,22 @@ $nbFavoris = count($favoris);
                                         <?php endif; ?>
                                     </span>
                                 <?php else: ?>
-                                    <span class="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2.5 py-1 rounded-full text-xs font-bold">
-                                        Nouveau
-                                    </span>
+                                    <?php 
+                                    // Vérifier si le bien est nouveau (moins de 7 jours)
+                                    $isNew = false;
+                                    if (!empty($bien['date_creation'])) {
+                                        $dateCreation = new DateTime($bien['date_creation']);
+                                        $maintenant = new DateTime();
+                                        $interval = $maintenant->diff($dateCreation);
+                                        $joursEcoules = $interval->days;
+                                        $isNew = $joursEcoules < 7;
+                                    }
+                                    ?>
+                                    <?php if ($isNew): ?>
+                                        <span class="absolute top-2 right-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-2.5 py-1 rounded-full text-xs font-bold">
+                                            Nouveau
+                                        </span>
+                                    <?php endif; ?>
                                 <?php endif; ?>
 
                                 <!-- Badge animaux -->
@@ -210,8 +223,8 @@ $nbFavoris = count($favoris);
                 <p class="text-gray-600 mb-8 max-w-md mx-auto">
                     Commencez à explorer nos locations et ajoutez vos coups de cœur en cliquant sur l'icône cœur
                 </p>
-                <a href="../Pages/index.php" 
-                   class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-800 transition shadow-lg">
+                <a href="../index.php" 
+                   class="inline-flex items-center gap-2 bg-gradient-to-r from-pink-600 to-purple-700 text-white px-8 py-3 rounded-lg font-semibold hover:from-pink-700 hover:to-purple-800 transition shadow-lg no-underline">
                     <i class="fas fa-search"></i>
                     Découvrir les locations
                 </a>
@@ -221,7 +234,7 @@ $nbFavoris = count($favoris);
     </div>
 
     <!-- FOOTER -->
-    <?php include 'footer.php'; ?>
+    <?php include '../footer.php'; ?>
 
     <script>
         function retirerFavori(idBien) {

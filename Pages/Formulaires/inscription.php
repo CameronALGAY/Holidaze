@@ -6,6 +6,7 @@
     <title>Inscription</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -186,7 +187,7 @@
                                     <div class="input-group">
                                         <input type="text" class="form-control" id="siret_search" placeholder="Ex: 12345678900014 ou 123456789" maxlength="14">
                                         <button class="btn btn-primary search-btn" type="button" id="searchSiretBtn">
-                                            <i class="bi bi-search me-1"></i>
+                                            <i class="fas fa-search me-1"></i>
                                             Rechercher
                                         </button>
                                     </div>
@@ -195,7 +196,7 @@
                                     <!-- Zone de résultats de recherche -->
                                     <div id="sirenResultsContainer" class="mt-3 d-none">
                                         <div class="alert alert-info">
-                                            <i class="bi bi-info-circle me-2"></i>
+                                            <i class="fas fa-info-circle me-2"></i>
                                             <strong>Plusieurs établissements trouvés.</strong> Sélectionnez celui qui vous correspond :
                                         </div>
                                         <div id="sirenResults" class="border rounded"></div>
@@ -263,7 +264,7 @@
                                 <div class="input-group">
                                     <input type="password" class="form-control" id="mot_de_passe" name="mot_de_passe" required>
                                     <button class="btn btn-outline-secondary" type="button" id="togglePassword" title="Afficher/Masquer le mot de passe">
-                                        <i class="bi bi-eye" id="eyeIcon"></i>
+                                        <i class="fas fa-eye" id="eyeIcon"></i>
                                     </button>
                                 </div>
 
@@ -296,13 +297,13 @@
                                 <div class="d-flex align-items-center gap-3 mb-3">
                                     <div id="captchaDisplay" class="captcha-display"></div>
                                     <button type="button" id="refreshCaptcha" class="btn btn-secondary" title="Générer un nouveau code">
-                                        <i class="bi bi-arrow-clockwise"></i>
+                                        <i class="fas fa-redo"></i>
                                     </button>
                                 </div>
                                 <input type="text" class="form-control" id="captchaInput" placeholder="Entrez le code ci-dessus" autocomplete="off">
                                 
                                 <div id="captchaError" class="alert alert-danger mt-2 d-none" role="alert">
-                                    <i class="bi bi-x-circle-fill me-2"></i>
+                                    <i class="fas fa-times-circle me-2"></i>
                                     <strong>Le code de vérification est incorrect.</strong> Veuillez réessayer.
                                 </div>
                             </div>

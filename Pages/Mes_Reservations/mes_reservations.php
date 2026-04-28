@@ -30,8 +30,8 @@ foreach ($reservations as $r) {
         'start' => $r['date_debut'],
         'end'   => $end_date_exclusive,
         'url'   => '/Pages/Bien/bien_detail.php?id=' . $r['id_bien'], // Lien vers la page du bien
-        'backgroundColor' => '#7c3aed', // Couleur violette pour les réservations
-        'borderColor'     => '#6d28d9',
+        'backgroundColor' => '#2563eb', // Couleur bleue pour les réservations
+        'borderColor'     => '#1e40af',
         'textColor'       => '#fff',
         'allDay'          => true
     ];
@@ -70,7 +70,7 @@ $events_json = json_encode($events);
 
 <div class="main-content">
     <div class="container mx-auto px-4 py-10 max-w-7xl">
-        <h1 class="text-4xl font-bold text-purple-600 mb-8">Mes Réservations</h1>
+        <h1 class="text-4xl font-bold" style="color: #2563eb;" >Réservations</h1>
         
         <div id='calendar' class="bg-white p-6 rounded-lg shadow-xl"></div>
         
@@ -90,14 +90,21 @@ $events_json = json_encode($events);
             headerToolbar: {
                 left: 'prev,next today',
                 center: 'title',
-                right: 'dayGridMonth,timeGridWeek,listWeek'
+                right: 'dayGridMonth,timeGridWeek,listWeek,close'
+            },
+            customButtons: {
+                close: {
+                    text: 'Fermer',
+                    click: function() {
+                        window.history.back();
+                    }
+                }
             },
             events: events,
             eventClick: function(info) {
-                // Rediriger vers la page du bien si une URL est définie
                 if (info.event.url) {
                     window.location.href = info.event.url;
-                    return false; // Empêche le comportement par défaut du lien
+                    return false;
                 }
             }
         });
