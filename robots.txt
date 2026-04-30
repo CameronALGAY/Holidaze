@@ -18,4 +18,4 @@ Disallow: /Pages/Mes_Reservations/
 Disallow: /Pages/Profil/
 Disallow: /Pages/Réservations/
 
-Sitemap: http://localhost:8000/sitemap.php
+Sitemap: http://localhost:8000/sitemap.xml
