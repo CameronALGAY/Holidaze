@@ -21,9 +21,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
 
 // Inclusion de la base de données (chemin correct depuis ajax/)
 require_once '../include/db.php';
+require_once '../include/csrf.php';
 
 // Vérification de la méthode de requête et de la présence des données
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_message']) && isset($_POST['action'])) {
+    csrf_verify();
     
     // id_message correspond maintenant à id_conversation
     $id_message = (int)$_POST['id_message'];

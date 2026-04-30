@@ -1,6 +1,7 @@
 <?php
 include '../header.php';
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 require_once 'reservation_class.php';
 
 $controller = new ReservationsController($pdo);
@@ -35,6 +36,7 @@ $locataires = $controller->getAllLocataires();
     <h1 class="text-2xl font-bold mb-4">📅 Gestion des réservations</h1>
 
     <form method="POST" action="reservation_traitement.php" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <?= csrf_field() ?>
         <input type="hidden" name="action" value="<?= $editId ? 'update' : 'create' ?>">
         <input type="hidden" name="id_reservation" value="<?= $editReservation['id_reservations'] ?? '' ?>">
 

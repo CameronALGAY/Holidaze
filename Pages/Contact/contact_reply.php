@@ -7,6 +7,8 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once '../../include/csrf.php';
+
 // Fonction utilitaire pour retourner une réponse JSON
 function sendJsonResponse($success, $message = null, $httpCode = 200) {
     http_response_code($httpCode);
@@ -23,6 +25,8 @@ if (!isset($_SESSION['utilisateur_id'])) {
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendJsonResponse(false, 'Méthode non autorisée.', 405);
 }
+
+csrf_verify();
 
 // Vérification des données
 if (!isset($_POST['id_conversation']) || !isset($_POST['message'])) {

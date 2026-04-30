@@ -1,4 +1,6 @@
 <?php
+session_start();
+require_once '../../include/csrf.php';
 // =================================================================================
 // FICHIER DE TRAITEMENT DU FORMULAIRE D'INSCRIPTION
 // =================================================================================
@@ -29,6 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     header('Location: /inscription.php');
     exit();
 }
+
+csrf_verify();
 
 // 3. Récupération et validation des données communes
 $errors = [];

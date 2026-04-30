@@ -2,6 +2,7 @@
 // menages_form.php
 
 require_once '../../include/db.php';           // connexion PDO
+require_once '../../include/csrf.php';
 include '../header.php';
 require_once 'menages_class.php';             // classe Menage
 require_once 'menages_traitement.php';        // MenageManager (ou inclus dans ce fichier)
@@ -26,6 +27,7 @@ if ($id_menage > 0) {
 
 // Traitement du formulaire (création / modification)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $id_menage      = isset($_POST['id_menage']) ? (int)$_POST['id_menage'] : 0;
     $id_reservations = (int)($_POST['id_reservations'] ?? 0);
     $id_intervenant  = (int)($_POST['id_intervenant'] ?? 0);
@@ -136,6 +138,7 @@ if ($search_reservation !== '') {
         <h2 class="text-xl font-semibold text-slate-800 mb-4">➕ Ajouter un ménage</h2>
 
         <form action="" method="POST" id="menageForm" class="space-y-4">
+            <?= csrf_field() ?>
             <input type="hidden" name="id_menage" value="0">
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

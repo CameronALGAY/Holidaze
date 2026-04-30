@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 require_once 'reservation_class.php';
 
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -88,6 +89,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: reservation_form.php');
     exit;
 }
+
+csrf_verify();
 
 $action = $_POST['action'] ?? '';
 

@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '../../include/csrf.php';
 
 // Sécurité : seul un utilisateur connecté peut accéder à cette page
 if (!isset($_SESSION['utilisateur_id'])) {
@@ -42,6 +43,7 @@ $conversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <title>Messages - Holidaze</title>
     <meta name="description" content="Consultez vos messages et conversations avec l'equipe Holidaze.">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <link rel="canonical" href="<?php
         $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
         echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Contact/mes_messages.php';
@@ -241,12 +243,16 @@ function sendFollowUp(event, id_conversation) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Envoi en cours...';
 
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
     fetch('contact_reply.php', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'id_conversation=' + encodeURIComponent(id_conversation) + '&message=' + encodeURIComponent(followUp)
+        body: 'id_conversation=' + encodeURIComponent(id_conversation) +
+              '&message=' + encodeURIComponent(followUp) +
+              '&_csrf_token=' + encodeURIComponent(csrfToken)
     })
     .then(response => response.json())
     .then(data => {

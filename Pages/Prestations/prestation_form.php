@@ -1,5 +1,6 @@
 <?php
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 require_once 'prestation_class.php';
 require_once 'prestation_traitement.php';
 
@@ -11,6 +12,7 @@ $message_type = ''; // Pour gérer la couleur du message (success/error)
 $edit_id = isset($_GET['edit_id']) ? (int)$_GET['edit_id'] : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'create') {
             $libelle = $_POST['libelle_prestation'] ?? '';
@@ -81,6 +83,7 @@ $prestations = $search ? $controller->searchPrestations($search) : $controller->
 
         <!-- Formulaire d'ajout -->
         <form action="" method="POST" class="mb-6">
+            <?= csrf_field() ?>
             <input type="hidden" name="action" value="create">
             <label class="block text-gray-700 mb-2">Nom de la prestation :</label>
             <input type="text" name="libelle_prestation" required
@@ -112,6 +115,7 @@ $prestations = $search ? $controller->searchPrestations($search) : $controller->
                     <?php if ($edit_id === $prestation['id_prestation']): ?>
                         <!-- Mode édition -->
                         <form action="" method="POST" class="flex justify-between items-center border-b py-2 gap-2">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="id_prestation" value="<?php echo $prestation['id_prestation']; ?>">
                             <input type="text" name="libelle_prestation"
@@ -129,6 +133,7 @@ $prestations = $search ? $controller->searchPrestations($search) : $controller->
                                 <a href="?edit_id=<?php echo $prestation['id_prestation']; ?>&search=<?php echo urlencode($search); ?>"
                                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</a>
                                 <form action="" method="POST" class="inline">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id_prestation" value="<?php echo $prestation['id_prestation']; ?>">
                                     <button type="submit" onclick="return confirm('Supprimer cette prestation ?')"

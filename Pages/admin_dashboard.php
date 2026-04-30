@@ -13,6 +13,7 @@ if (!isset($_SESSION['utilisateur_id']) || $_SESSION['role'] !== 'admin') {
 // Chemins corrects depuis Pages/Admin/
 require_once '../include/db.php';
 require_once '..//Pages/Bien/bien_class.php';
+require_once '../include/csrf.php';
 
 $controller = new BiensController($pdo);
 $pending = $controller->getPendingBiens();
@@ -27,6 +28,7 @@ $utilisateur_nom = $_SESSION['prenom'] . ' ' . ($_SESSION['nom'] ?? '') ?: 'Admi
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord administrateur - Holidaze</title>
 	<meta name="robots" content="noindex, nofollow">
+	<meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
@@ -379,6 +381,8 @@ $utilisateur_nom = $_SESSION['prenom'] . ' ' . ($_SESSION['nom'] ?? '') ?: 'Admi
 </main>
 
 <script>
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
 // Fonctions pour gérer l'ouverture et la fermeture des modales
 function openModal(id_message) {
     const modal = document.getElementById(`messageModal${id_message}`);
@@ -406,7 +410,7 @@ function marquerCommeLu(id_message) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: 'id_message=' + encodeURIComponent(id_message) + '&action=mark_read'
+		body: 'id_message=' + encodeURIComponent(id_message) + '&action=mark_read' + '&_csrf_token=' + encodeURIComponent(csrfToken)
     })
     .then(response => response.json())
     .then(data => {
@@ -472,7 +476,7 @@ function marquerCommeLu(id_message) {
 	        headers: {
 	            'Content-Type': 'application/x-www-form-urlencoded',
 	        },
-	        body: 'id_message=' + encodeURIComponent(id_message) + '&action=close_conversation'
+			body: 'id_message=' + encodeURIComponent(id_message) + '&action=close_conversation' + '&_csrf_token=' + encodeURIComponent(csrfToken)
 	    })
 	    .then(response => response.json())
 	    .then(data => {
@@ -499,7 +503,7 @@ function marquerCommeLu(id_message) {
 	        headers: {
 	            'Content-Type': 'application/x-www-form-urlencoded',
 	        },
-	        body: 'id_message=' + encodeURIComponent(id_message) + '&action=open_conversation'
+			body: 'id_message=' + encodeURIComponent(id_message) + '&action=open_conversation' + '&_csrf_token=' + encodeURIComponent(csrfToken)
 	    })
 	    .then(response => response.json())
 	    .then(data => {
