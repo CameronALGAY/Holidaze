@@ -71,11 +71,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact - Holidaze</title>
+    <meta name="description" content="Contactez l'equipe Holidaze pour toute question ou assistance sur vos reservations.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Contact/contact.php';
+    ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
 <?php include '../header.php'; ?>
+
+<h1 class="visually-hidden">Contact Holidaze</h1>
 
 <div class="container py-5">
     <div class="row justify-content-center">

@@ -24,6 +24,12 @@ $nbFavoris = count($favoris);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Favoris - Holidaze</title>
+    <meta name="description" content="Consultez vos biens favoris sur Holidaze.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Favoris/mes-favoris.php';
+    ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="../Photo/icon.png" type="image/png">
@@ -118,8 +124,9 @@ $nbFavoris = count($favoris);
                             <!-- Image -->
                             <div class="listing-image relative h-48 bg-gray-200 overflow-hidden">
                                 <?php if ($firstPhoto): ?>
-                                    <img src="/<?= htmlspecialchars($firstPhoto['lien_photo']) ?>" 
+                                     <img src="/<?= htmlspecialchars($firstPhoto['lien_photo']) ?>" 
                                          alt="<?= htmlspecialchars($firstPhoto['nom_photo']) ?>" 
+                                         loading="lazy" width="320" height="192"
                                          class="w-full h-full object-cover transition-transform duration-500 hover:scale-110">
                                 <?php else: ?>
                                     <div class="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">

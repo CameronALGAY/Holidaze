@@ -17,6 +17,12 @@ $errorMsg = $_GET['error'] ?? null;
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gestion des Types de Bien</title>
+  <meta name="description" content="Interface de gestion des types de bien pour l'administration Holidaze.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="<?php
+      $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+      echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/TypeBien/typebien_form.php';
+  ?>">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100">

@@ -94,6 +94,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Connexion</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Connexion a votre compte Holidaze.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Formulaires/connexion.php';
+    ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Awesome pour l'icône œil -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">

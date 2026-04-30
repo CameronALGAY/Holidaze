@@ -2,7 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestion des saisons</title>
+  <meta name="description" content="Interface de gestion des saisons pour l'administration Holidaze.">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="<?php
+      $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+      echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Saison/saison_form.php';
+  ?>">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6">

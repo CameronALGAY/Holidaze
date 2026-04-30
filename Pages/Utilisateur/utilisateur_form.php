@@ -12,6 +12,7 @@ if (!isset($_SESSION['utilisateur_id']) || ($_SESSION['role'] ?? '') !== 'admin'
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestion des utilisateurs - Holidaze</title>
+  <meta name="robots" content="noindex, nofollow">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
@@ -165,7 +166,7 @@ async function loadUsers(search = '') {
       return `
         <tr class="border-t hover:bg-gray-50 transition">
           <td class="px-4 py-3">
-            <img src="../../Photo/profil/${safePhoto}" alt="Photo profil" class="w-12 h-12 rounded-full object-cover border border-gray-300" onerror="this.src='../../Photo/profil/default-avatar.png'">
+            <img src="../../Photo/profil/${safePhoto}" alt="Photo de ${safeName}" loading="lazy" width="48" height="48" class="w-12 h-12 rounded-full object-cover border border-gray-300" onerror="this.src='../../Photo/profil/default-avatar.png'">
           </td>
           <td class="px-4 py-3 font-semibold text-gray-800">${safeName}</td>
           <td class="px-4 py-3">${safeEmail}</td>
@@ -198,7 +199,7 @@ async function loadUsers(search = '') {
       return `
         <article class="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm">
           <div class="flex items-center gap-3">
-            <img src="../../Photo/profil/${safePhoto}" alt="Photo profil" class="w-12 h-12 rounded-full object-cover border border-gray-300" onerror="this.src='../../Photo/profil/default-avatar.png'">
+            <img src="../../Photo/profil/${safePhoto}" alt="Photo de ${safeName}" loading="lazy" width="48" height="48" class="w-12 h-12 rounded-full object-cover border border-gray-300" onerror="this.src='../../Photo/profil/default-avatar.png'">
             <div>
               <h3 class="font-bold text-gray-800">${safeName}</h3>
               <p class="text-sm text-gray-500">${safeEmail}</p>

@@ -23,6 +23,12 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
 <head>
 <meta charset="UTF-8">
 <title>Gestion des biens</title>
+<meta name="description" content="Interface de gestion des biens pour ajouter, modifier et administrer les locations.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="<?php
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Bien/bien_form.php';
+?>">
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -281,7 +287,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                         <?php if ($photos && count($photos) > 0): ?>
                             <?php foreach ($photos as $p): ?>
                                 <div class="photo-preview-item">
-                                    <img src="/<?= htmlspecialchars($p['lien_photo']) ?>" alt="<?= htmlspecialchars($p['nom_photo']) ?>">
+                                    <img src="/<?= htmlspecialchars($p['lien_photo']) ?>" alt="<?= htmlspecialchars($p['nom_photo']) ?>" loading="lazy">
                                     <button type="button" class="photo-delete-btn" 
                                             onclick="deleteExistingPhoto(<?= $p['id_photo'] ?>, this)"
                                             title="Supprimer cette photo">
@@ -357,7 +363,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                     <div class="flex justify-center">
                         <?php $photos = $controller->getPhotosByBienId($b['id_bien']); ?>
                         <?php if ($photos && count($photos) > 0): ?>
-                            <img src="/<?= htmlspecialchars($photos[0]['lien_photo']) ?>" alt="<?= htmlspecialchars($photos[0]['nom_photo']) ?>" class="w-48 h-48 object-cover rounded-xl shadow-md">
+                            <img src="/<?= htmlspecialchars($photos[0]['lien_photo']) ?>" alt="<?= htmlspecialchars($photos[0]['nom_photo']) ?>" loading="lazy" class="w-48 h-48 object-cover rounded-xl shadow-md">
                         <?php else: ?>
                             <div class="w-48 h-48 bg-gray-200 rounded-xl flex items-center justify-center shadow-md">
                                 <span class="text-gray-500">Aucune photo</span>
@@ -442,7 +448,7 @@ function previewImages(input) {
                 const div = document.createElement('div');
                 div.className = 'photo-preview-item';
                 div.innerHTML = `
-                    <img src="${e.target.result}" alt="Nouvelle photo">
+                    <img src="${e.target.result}" alt="Nouvelle photo" loading="lazy">
                     <button type="button" class="photo-delete-btn" onclick="removeNewPhoto(${index})" title="Retirer cette photo">
                         <i class="bi bi-x-lg"></i>
                     </button>

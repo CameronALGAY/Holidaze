@@ -41,6 +41,18 @@ $biensJSON = json_encode($biens);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Carte des biens - Holidaze</title>
+    <meta name="description" content="Carte interactive des biens Holidaze avec zones approximatives et acces rapide aux annonces.">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Carte/carte.php';
+    ?>">
+    <meta property="og:title" content="Carte des biens - Holidaze">
+    <meta property="og:description" content="Explorez les biens disponibles sur une carte interactive Holidaze.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Carte/carte.php';
+    ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     
@@ -218,6 +230,8 @@ $biensJSON = json_encode($biens);
 <body>
     <?php include '../header.php'; ?>
 
+    <h1 class="visually-hidden">Carte des biens Holidaze</h1>
+
     <!-- Info sur le nombre de biens -->
     <div class="map-controls">
         <div class="map-stats">
@@ -273,7 +287,7 @@ $biensJSON = json_encode($biens);
             
             // Créer le contenu du popup
             const imageHtml = bien.photo 
-                ? `<img src="/../../${bien.photo}" alt="${bien.nom_bien}" class="popup-image" onerror="this.parentElement.innerHTML='<div class=\\'no-image\\'><i class=\\'bi bi-house-door\\'></i></div>'">`
+                ? `<img src="/../../${bien.photo}" alt="${bien.nom_bien}" loading="lazy" class="popup-image" onerror="this.parentElement.innerHTML='<div class=\\'no-image\\'><i class=\\'bi bi-house-door\\'></i></div>'">`
                 : `<div class="no-image"><i class="bi bi-house-door"></i></div>`;
             
             const typeHtml = bien.des_typebien 
@@ -338,6 +352,6 @@ $biensJSON = json_encode($biens);
         }
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
 </body>
 </html>

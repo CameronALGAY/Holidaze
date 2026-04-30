@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription</title>
+    <meta name="description" content="Creez votre compte Holidaze pour reserver des locations et gerer vos favoris.">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Formulaires/inscription.php';
+    ?>">
+    <meta property="og:title" content="Inscription - Holidaze">
+    <meta property="og:description" content="Inscrivez-vous sur Holidaze pour acceder aux locations et services.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Formulaires/inscription.php';
+    ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -324,7 +336,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <script>
         const passwordInput = document.getElementById('mot_de_passe');
 // Fonctionnalité pour afficher/masquer le mot de passe
@@ -567,7 +579,7 @@ togglePassword.addEventListener('click', function() {
                 <li>
                     <a class="dropdown-item country-item d-flex align-items-center gap-2" href="#" data-code="${country.code}" data-flag="${country.flag}" data-name="${country.name}" data-cca2="${country.cca2}">
                         ${country.flag.startsWith('http') 
-                            ? `<img src="${country.flag}" alt="${country.name}" class="country-flag">`
+                            ? `<img src="${country.flag}" alt="${country.name}" loading="lazy" class="country-flag">`
                             : `<span style="font-size: 1.5rem;">${country.flag}</span>`
                         }
                         <span class="flex-grow-1">${country.name}</span>
@@ -595,7 +607,7 @@ togglePassword.addEventListener('click', function() {
             const telInput = document.getElementById('tel');
             
             if (country.flag.startsWith('http')) {
-                flagElement.innerHTML = `<img src="${country.flag}" alt="${country.name}" class="country-flag">`;
+                flagElement.innerHTML = `<img src="${country.flag}" alt="${country.name}" loading="lazy" class="country-flag">`;
             } else {
                 flagElement.textContent = country.flag;
             }

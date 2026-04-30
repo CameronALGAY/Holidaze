@@ -16,6 +16,11 @@ if (session_status() === PHP_SESSION_NONE) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Holidaze</title>
+    <meta name="description" content="Holidaze : locations de vacances et hebergements partout en France.">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+    ?>">
     <!-- Bootstrap 5 CSS + Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
@@ -82,7 +87,7 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div class="profile-dropdown">
                         <div id="profileToggle">
                             <?php if (!empty($_SESSION['photo_profil'])): ?>
-                                <img src="<?= htmlspecialchars($_SESSION['photo_profil']) ?>" alt="Profil" class="profile-pic" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
+                                <img src="<?= htmlspecialchars($_SESSION['photo_profil']) ?>" alt="Profil utilisateur" loading="lazy" width="40" height="40" class="profile-pic" onerror="this.style.display='none';this.nextElementSibling.style.display='inline';">
                                 <i class="bi bi-person-circle profile-icon-fallback" style="display:none;"></i>
                             <?php else: ?>
                                 <i class="bi bi-person-circle profile-icon-fallback"></i>

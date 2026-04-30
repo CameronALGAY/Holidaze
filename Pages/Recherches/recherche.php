@@ -35,6 +35,18 @@ function getPhotosByBienId($pdo, $idBien) {
 <head>
     <meta charset="UTF-8">
     <title>Biens à <?= htmlspecialchars($destination) ?> - ImmoSite</title>
+    <meta name="description" content="Locations disponibles a <?= htmlspecialchars($destination) ?> avec photos, details et disponibilites sur Holidaze.">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Recherches/recherche.php?destination=' . urlencode($destination);
+    ?>">
+    <meta property="og:title" content="Biens a <?= htmlspecialchars($destination) ?> - Holidaze">
+    <meta property="og:description" content="Consultez les locations disponibles a <?= htmlspecialchars($destination) ?> sur Holidaze.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Recherches/recherche.php?destination=' . urlencode($destination);
+    ?>">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -62,9 +74,10 @@ function getPhotosByBienId($pdo, $idBien) {
                     ?>
 
                     <div class="rounded-xl overflow-hidden shadow-md bg-white hover:shadow-xl transition">
-                        <img src="<?= htmlspecialchars($photoUrl) ?>"
-                             alt="Photo du bien"
-                             class="w-full h-40 object-cover">
+                                <img src="<?= htmlspecialchars($photoUrl) ?>"
+                                    alt="Photo de <?= htmlspecialchars($bien['nom_bien']) ?> a <?= htmlspecialchars($bien['nom_commune']) ?>"
+                                    loading="lazy" width="320" height="160"
+                                    class="w-full h-40 object-cover">
 
                         <div class="p-4">
                             <h2 class="text-lg font-semibold mb-2">

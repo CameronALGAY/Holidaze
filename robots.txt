@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+Disallow: /Pages/Admin/
+Disallow: /Pages/admin_dashboard.php
+Disallow: /Pages/Utilisateur/
+Disallow: /Pages/Bien/bien_form.php
+Disallow: /Pages/Locataire/
+Disallow: /Pages/Prestations/
+Disallow: /Pages/Saison/
+Disallow: /Pages/Tarifs/
+Disallow: /Pages/TypeBien/
+Disallow: /Pages/Intervenants/
+Disallow: /Pages/Menages/
+Disallow: /Pages/Contact/
+Disallow: /Pages/Formulaires/
+Disallow: /Pages/Mes_Reservations/
+Disallow: /Pages/Profil/
+Disallow: /Pages/Réservations/
+
+Sitemap: http://localhost:8000/sitemap.php

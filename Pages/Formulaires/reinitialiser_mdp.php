@@ -81,6 +81,13 @@ if ($form_enabled && $_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <title>Réinitialiser le Mot de Passe</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Definissez un nouveau mot de passe pour votre compte Holidaze.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Formulaires/reinitialiser_mdp.php';
+    ?>">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-6 flex items-center justify-center min-h-screen">

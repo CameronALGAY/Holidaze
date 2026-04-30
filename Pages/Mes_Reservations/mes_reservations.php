@@ -46,6 +46,12 @@ $events_json = json_encode($events);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mes Réservations</title>
+    <meta name="description" content="Consultez vos reservations Holidaze et accedez a vos sejours.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Mes_Reservations/mes_reservations.php';
+    ?>">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>

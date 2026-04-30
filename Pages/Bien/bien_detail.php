@@ -150,6 +150,42 @@ if (isset($_SESSION['utilisateur_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="<?= htmlspecialchars($bien['nom_bien']) ?> - Location de vacances à <?= htmlspecialchars($bien['nom_commune']) ?>">
     <title><?= htmlspecialchars($bien['nom_bien']) ?> | Location vacances</title>
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Bien/bien_detail.php?id=' . urlencode((string)$id_bien);
+    ?>">
+    <meta property="og:title" content="<?= htmlspecialchars($bien['nom_bien']) ?> | Location vacances">
+    <meta property="og:description" content="<?= htmlspecialchars($bien['nom_bien']) ?> - Location de vacances à <?= htmlspecialchars($bien['nom_commune']) ?>">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Bien/bien_detail.php?id=' . urlencode((string)$id_bien);
+    ?>">
+    <script type="application/ld+json">
+    <?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $pageUrl = $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Bien/bien_detail.php?id=' . urlencode((string)$id_bien);
+        $jsonLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'LodgingBusiness',
+            'name' => $bien['nom_bien'],
+            'description' => $bien['description_bien'] ?? '',
+            'url' => $pageUrl,
+            'address' => [
+                '@type' => 'PostalAddress',
+                'streetAddress' => $bien['rue_bien'] ?? '',
+                'addressLocality' => $bien['nom_commune'] ?? '',
+                'postalCode' => $bien['com_bien'] ?? ''
+            ],
+            'geo' => [
+                '@type' => 'GeoCoordinates',
+                'latitude' => $bien['latitude_commune'] ?? null,
+                'longitude' => $bien['longitude_commune'] ?? null
+            ]
+        ];
+        echo json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    ?>
+    </script>
     
     <!-- Bootstrap CSS (pour le footer) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -335,60 +371,68 @@ if (isset($_SESSION['utilisateur_id'])) {
                 <div class="relative rounded-2xl overflow-hidden shadow-xl mb-8 photo-grid">
                     <?php if (count($photos) === 0): ?>
                         <!-- Aucune photo -->
-                        <img src="../../Photo/uploads/default.jpg" 
-                             alt="Photo par défaut" 
-                             class="w-full h-96 object-cover">
+                            <img src="../../Photo/uploads/default.jpg" 
+                                alt="Photo par défaut" 
+                                loading="lazy" width="1024" height="384"
+                                class="w-full h-96 object-cover">
                     
                     <?php elseif (count($photos) === 1): ?>
                         <!-- Une seule photo -->
-                        <img src="../../<?= htmlspecialchars($photos[0]['lien_photo']) ?>" 
-                             alt="Photo du bien"
-                             class="w-full h-96 object-cover cursor-pointer hover:brightness-95 transition"
-                             onclick="openLightbox(0)">
+                            <img src="../../<?= htmlspecialchars($photos[0]['lien_photo']) ?>" 
+                                alt="Photo du bien <?= htmlspecialchars($bien['nom_bien']) ?>"
+                                loading="lazy" width="1024" height="384"
+                                class="w-full h-96 object-cover cursor-pointer hover:brightness-95 transition"
+                                onclick="openLightbox(0)">
                     
                     <?php elseif (count($photos) === 2): ?>
                         <!-- Deux photos -->
                         <div class="grid grid-cols-2 gap-2 h-96">
                             <?php foreach ($photos as $index => $p): ?>
-                                <img src="../../<?= htmlspecialchars($p['lien_photo']) ?>" 
-                                     alt="Photo du bien <?= $index + 1 ?>"
-                                     class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
-                                     onclick="openLightbox(<?= $index ?>)">
+                                  <img src="../../<?= htmlspecialchars($p['lien_photo']) ?>" 
+                                      alt="Photo du bien <?= $index + 1 ?>"
+                                      loading="lazy" width="512" height="384"
+                                      class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
+                                      onclick="openLightbox(<?= $index ?>)">
                             <?php endforeach; ?>
                         </div>
                     
                     <?php elseif (count($photos) === 3): ?>
                         <!-- Trois photos -->
                         <div class="grid grid-cols-2 gap-2 h-96">
-                            <img src="../../<?= htmlspecialchars($photos[0]['lien_photo']) ?>" 
-                                 alt="Photo principale"
-                                 class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition row-span-2"
-                                 onclick="openLightbox(0)">
-                            <img src="../../<?= htmlspecialchars($photos[1]['lien_photo']) ?>" 
-                                 alt="Photo du bien 2"
-                                 class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
-                                 onclick="openLightbox(1)">
-                            <img src="../../<?= htmlspecialchars($photos[2]['lien_photo']) ?>" 
-                                 alt="Photo du bien 3"
-                                 class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
-                                 onclick="openLightbox(2)">
+                               <img src="../../<?= htmlspecialchars($photos[0]['lien_photo']) ?>" 
+                                   alt="Photo principale de <?= htmlspecialchars($bien['nom_bien']) ?>"
+                                   loading="lazy" width="768" height="384"
+                                   class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition row-span-2"
+                                   onclick="openLightbox(0)">
+                               <img src="../../<?= htmlspecialchars($photos[1]['lien_photo']) ?>" 
+                                   alt="Photo du bien 2"
+                                   loading="lazy" width="384" height="192"
+                                   class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
+                                   onclick="openLightbox(1)">
+                               <img src="../../<?= htmlspecialchars($photos[2]['lien_photo']) ?>" 
+                                   alt="Photo du bien 3"
+                                   loading="lazy" width="384" height="192"
+                                   class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
+                                   onclick="openLightbox(2)">
                         </div>
                     
                     <?php else: ?>
                         <!-- Quatre photos ou plus (style Airbnb) -->
                         <div class="grid grid-cols-4 grid-rows-2 gap-2 h-96">
                             <!-- Grande photo à gauche -->
-                            <img src="../../<?= htmlspecialchars($photos[0]['lien_photo']) ?>" 
-                                 alt="Photo principale"
-                                 class="col-span-2 row-span-2 w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
-                                 onclick="openLightbox(0)">
+                               <img src="../../<?= htmlspecialchars($photos[0]['lien_photo']) ?>" 
+                                   alt="Photo principale de <?= htmlspecialchars($bien['nom_bien']) ?>"
+                                   loading="lazy" width="768" height="384"
+                                   class="col-span-2 row-span-2 w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
+                                   onclick="openLightbox(0)">
                             
                             <!-- Petites photos à droite -->
                             <?php for ($i = 1; $i < min(5, count($photos)); $i++): ?>
-                                <img src="../../<?= htmlspecialchars($photos[$i]['lien_photo']) ?>" 
-                                     alt="Photo du bien <?= $i + 1 ?>"
-                                     class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
-                                     onclick="openLightbox(<?= $i ?>)">
+                                  <img src="../../<?= htmlspecialchars($photos[$i]['lien_photo']) ?>" 
+                                      alt="Photo du bien <?= $i + 1 ?>"
+                                      loading="lazy" width="384" height="192"
+                                      class="w-full h-full object-cover cursor-pointer hover:brightness-95 transition"
+                                      onclick="openLightbox(<?= $i ?>)">
                             <?php endfor; ?>
                         </div>
                         
@@ -711,11 +755,12 @@ if (isset($_SESSION['utilisateur_id'])) {
     <!-- Miniatures -->
     <div class="absolute bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90vw] p-2">
         <?php foreach ($photos as $index => $p): ?>
-            <img src="../../<?= htmlspecialchars($p['lien_photo']) ?>" 
-                 alt="Miniature <?= $index + 1 ?>"
-                 class="thumbnail w-16 h-16 object-cover rounded cursor-pointer opacity-50 hover:opacity-100 transition"
-                 data-index="<?= $index ?>"
-                 onclick="openLightbox(<?= $index ?>)">
+              <img src="../../<?= htmlspecialchars($p['lien_photo']) ?>" 
+                  alt="Miniature <?= $index + 1 ?>"
+                  loading="lazy" width="64" height="64"
+                  class="thumbnail w-16 h-16 object-cover rounded cursor-pointer opacity-50 hover:opacity-100 transition"
+                  data-index="<?= $index ?>"
+                  onclick="openLightbox(<?= $index ?>)">
         <?php endforeach; ?>
     </div>
 </div>
@@ -724,7 +769,7 @@ if (isset($_SESSION['utilisateur_id'])) {
 <?php include '../footer.php'; ?>
 
 <!-- Scripts JavaScript -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
 
 <script>
     // ==========================================

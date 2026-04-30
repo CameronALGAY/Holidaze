@@ -28,6 +28,35 @@ $biens = $controller->getAllBiens();       // Appel méthode commentée
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Holidaze - Locations de vacances</title>
+    <meta name="description" content="Holidaze vous aide a trouver des locations de vacances en France. Filtres par ville, type de bien et prix, avec des offres verifiees.">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/index.php';
+    ?>">
+    <meta property="og:title" content="Holidaze - Locations de vacances">
+    <meta property="og:description" content="Trouvez votre location de vacances en France sur Holidaze.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/index.php';
+    ?>">
+    <script type="application/ld+json">
+    <?php
+        $baseUrl = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $baseUrl .= '://' . $_SERVER['HTTP_HOST'];
+        echo json_encode([
+            '@context' => 'https://schema.org',
+            '@type' => 'WebSite',
+            'name' => 'Holidaze',
+            'url' => $baseUrl . '/Pages/index.php',
+            'potentialAction' => [
+                '@type' => 'SearchAction',
+                'target' => $baseUrl . '/Pages/Recherches/recherche.php?destination={search_term_string}',
+                'query-input' => 'required name=search_term_string'
+            ]
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+    ?>
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="icon" href="../Photo/icon.png" type="image/png">
@@ -238,7 +267,7 @@ function load() {
                     container.innerHTML += `
                     <a href="Bien/bien_detail.php?id=${b.id_bien}" class="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition hover:-translate-y-3 no-underline">
                         <div class="relative h-64">
-                            <img src="${photo}" class="w-full h-full object-cover">
+                            <img src="${photo}" alt="Location ${b.nom_bien} a ${b.nom_commune}" loading="lazy" width="384" height="256" class="w-full h-full object-cover">
                             ${note}${animaux}
                         </div>
                         <div class="p-8">

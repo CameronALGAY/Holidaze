@@ -163,6 +163,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Profil - Holidaze</title>
+    <meta name="description" content="Gerez votre profil Holidaze, votre photo et vos informations personnelles.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="<?php
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Profil/profil.php';
+    ?>">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
@@ -213,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="profile-header text-center">
         <div class="profile-avatar" data-bs-toggle="modal" data-bs-target="#photoModal">
             <?php if ($photo_display): ?>
-                <img src="<?= htmlspecialchars($photo_display) ?>" alt="Photo de profil">
+                <img src="<?= htmlspecialchars($photo_display) ?>" alt="Photo de profil" loading="lazy" width="120" height="120">
             <?php else: ?>
                 <?= strtoupper(substr($utilisateur['prenom'], 0, 1) . substr($utilisateur['nom'], 0, 1)) ?>
             <?php endif; ?>
@@ -235,7 +241,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div id="current_photo_section" class="mb-4 text-center">
                         <h6>Photo actuelle</h6>
                         <?php if ($photo_display): ?>
-                            <img src="<?= htmlspecialchars($photo_display) ?>" alt="Photo actuelle" class="rounded-circle mb-3" style="width: 200px; height: 200px; object-fit: cover;">
+                            <img src="<?= htmlspecialchars($photo_display) ?>" alt="Photo actuelle" loading="lazy" width="200" height="200" class="rounded-circle mb-3" style="object-fit: cover;">
                         <?php else: ?>
                             <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3" style="width: 200px; height: 200px; font-size: 80px; color: #667eea;">
                                 <?= strtoupper(substr($utilisateur['prenom'], 0, 1) . substr($utilisateur['nom'], 0, 1)) ?>
@@ -244,7 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div id="crop_container" class="w-100 mb-4" style="display: none; max-height: 400px; overflow: hidden;">
-                        <img id="image_crop" src="" alt="Image à recadrer" style="width: 100%;">
+                        <img id="image_crop" src="" alt="Image a recadrer" loading="lazy" style="width: 100%;">
                     </div>
 
                     <div id="crop_controls" class="d-flex gap-2 mb-4" style="display: none;">
@@ -478,7 +484,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('crop_and_upload').addEventListener('click', cropAndUpload);
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
     <?php include '../footer.php'; ?>
 </body>
 </html>
