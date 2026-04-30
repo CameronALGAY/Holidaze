@@ -6,11 +6,13 @@ if (!isset($_SESSION['utilisateur_id'])) {
 }
 
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 
 $message_envoye = false;
 $erreur = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     $sujet = trim($_POST['sujet'] ?? '');
     $contenu = trim($_POST['message'] ?? '');
     
@@ -108,6 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </p>
 
                         <form method="POST">
+                            <?= csrf_field() ?>
                             <div class="mb-3">
                                 <label for="sujet" class="form-label fw-bold">Sujet</label>
                                 <input type="text" class="form-control" id="sujet" name="sujet" required maxlength="100"

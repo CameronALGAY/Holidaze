@@ -1,3 +1,7 @@
+<?php
+session_start();
+require_once '../../include/csrf.php';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -159,6 +163,8 @@
                         <div id="message" class="alert d-none" role="alert"></div>
                         
                         <form id="inscriptionForm" action="inscription_traitement.php" method="POST">
+                            <?= csrf_field() ?>
+                            <?= csrf_field() ?>
                             <input type="hidden" name="type_entite" id="typeEntiteInput" value="individu">
                             
                             <div class="mb-3">

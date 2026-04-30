@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 
 // Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION['utilisateur_id'])) {
@@ -24,6 +25,7 @@ if (!empty($utilisateur['photo_profil'])) {
 
 // Traitement des POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     // === Mise à jour du profil ===
     if (isset($_POST['update_profile'])) {
         $prenom = trim($_POST['prenom']);
@@ -266,6 +268,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </label>
                         <?php if ($photo_display): ?>
                             <form method="POST">
+                                <?= csrf_field() ?>
                                 <input type="hidden" name="delete_photo" value="1">
                                 <button type="submit" class="btn btn-outline-danger"><i class="bi bi-trash"></i> Supprimer</button>
                             </form>
@@ -274,6 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <form id="crop_form" method="POST" style="display: none; width: 100%;">
+                        <?= csrf_field() ?>
                         <input type="hidden" name="update_photo" value="1">
                         <input type="hidden" id="cropped_image_data" name="photo_profil">
                         <div class="w-100 d-flex justify-content-between">
@@ -310,6 +314,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="profile-card">
                     <h2>Modifier mon profil</h2>
                     <form method="POST">
+                        <?= csrf_field() ?>
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Prénom</label>
@@ -337,6 +342,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="profile-card">
                     <h2>Mot de passe</h2>
                     <form method="POST">
+                        <?= csrf_field() ?>
                         <div class="mb-3">
                             <label class="form-label">Ancien</label>
                             <input type="password" name="ancien_mot_de_passe" class="form-control" required>

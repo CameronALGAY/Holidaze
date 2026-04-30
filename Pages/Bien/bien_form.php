@@ -1,6 +1,7 @@
 <?php
 include '../header.php';
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 require_once 'bien_class.php';
 require_once '../Communes/communes_class.php';
 require_once '../TypeBien/typebien_class.php';
@@ -25,6 +26,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
 <title>Gestion des biens</title>
 <meta name="description" content="Interface de gestion des biens pour ajouter, modifier et administrer les locations.">
 <meta name="robots" content="noindex, nofollow">
+<meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
 <link rel="canonical" href="<?php
     $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
     echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Bien/bien_form.php';
@@ -114,6 +116,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
     <h1 class="text-2xl font-bold mb-4">Gestion des biens</h1>
 
     <form method="POST" action="bien_traitement.php" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <?= csrf_field() ?>
         <input type="hidden" name="action" value="<?= $editId ? 'update' : 'create' ?>">
         <input type="hidden" name="id_bien" value="<?= $editBien['id_bien'] ?? '' ?>">
 
@@ -407,7 +410,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
                                    fetch('bien_traitement.php', {
                                        method: 'POST',
                                        headers: {'Content-Type':'application/x-www-form-urlencoded'},
-                                       body: 'action=delete&id_bien=<?= $b['id_bien'] ?>'
+                                       body: 'action=delete&id_bien=<?= $b['id_bien'] ?>&_csrf_token=' + encodeURIComponent(csrfToken)
                                    }).then(()=> window.location='bien_form.php');
                                }"><i class="fas fa-trash"></i></a>
                         </div>
@@ -431,6 +434,7 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
 <script>
 // Variables globales pour stocker les fichiers
 let selectedFiles = [];
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 // Prévisualisation des images
 function previewImages(input) {
@@ -483,7 +487,7 @@ function deleteExistingPhoto(photoId, button) {
     fetch('bien_traitement.php', {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: `action=delete_photo&id_photo=${photoId}`
+        body: `action=delete_photo&id_photo=${photoId}&_csrf_token=${encodeURIComponent(csrfToken)}`
     })
     .then(response => response.json())
     .then(data => {

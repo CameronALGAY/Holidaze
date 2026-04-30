@@ -1,5 +1,6 @@
 <?php
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 include '../header.php';
 require_once 'locataire_class.php';
 require_once 'locataire_traitement.php';
@@ -12,6 +13,7 @@ $message_type = ''; // Pour gérer la couleur du message (success/error)
 $edit_id = isset($_GET['edit_id']) ? (int)$_GET['edit_id'] : null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    csrf_verify();
     if (isset($_POST['action'])) {
         if ($_POST['action'] === 'create') {
             $locataire = new Locataire(
@@ -131,6 +133,7 @@ $locataires = $search ? $controller->searchLocataires($search) : $controller->ge
 
         <!-- Formulaire d'ajout -->
         <form action="" method="POST" id="locataireForm" class="mb-6">
+            <?= csrf_field() ?>
             <input type="hidden" name="action" value="create">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -241,6 +244,7 @@ $locataires = $search ? $controller->searchLocataires($search) : $controller->ge
                     <?php if ($edit_id === $locataire['id_locataire']): ?>
                         <!-- Mode édition -->
                         <form action="" method="POST" class="flex flex-col border-b py-2 gap-2">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="id_locataire" value="<?php echo $locataire['id_locataire']; ?>">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,6 +341,7 @@ $locataires = $search ? $controller->searchLocataires($search) : $controller->ge
                                 <a href="?edit_id=<?php echo $locataire['id_locataire']; ?>&search=<?php echo urlencode($search); ?>"
                                    class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">✏️ Modifier</a>
                                 <form action="" method="POST" class="inline">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id_locataire" value="<?php echo $locataire['id_locataire']; ?>">
                                     <button type="submit" onclick="return confirm('Supprimer ce locataire ?')"

@@ -1,5 +1,6 @@
 <?php
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 include '../header.php';
 require_once 'intervenants_class.php';
 require_once 'intervenants_traitement.php';
@@ -13,6 +14,7 @@ $edit_id = isset($_GET['edit_id']) ? (int)$_GET['edit_id'] : null;
 
 // POST (create / update / delete)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    csrf_verify();
     $action = $_POST['action'];
 
     if ($action === 'create') {
@@ -99,6 +101,7 @@ $intervenants = $manager->getAll();
         <h2 class="text-xl font-semibold text-slate-800 mb-4">➕ Ajouter un intervenant</h2>
 
         <form method="post" class="space-y-4">
+            <?= csrf_field() ?>
             <input type="hidden" name="action" value="create">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -135,6 +138,7 @@ $intervenants = $manager->getAll();
                     <?php if ($edit_id === $i->getIdIntervenant()): ?>
                         <!-- Édition -->
                         <form method="post" class="py-3 space-y-3">
+                            <?= csrf_field() ?>
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="id_intervenant" value="<?php echo $i->getIdIntervenant(); ?>">
 
@@ -181,6 +185,7 @@ $intervenants = $manager->getAll();
                                     ✏️ Modifier
                                 </a>
                                 <form method="post" class="inline">
+                                    <?= csrf_field() ?>
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id_intervenant" value="<?php echo $i->getIdIntervenant(); ?>">
                                     <button type="submit"

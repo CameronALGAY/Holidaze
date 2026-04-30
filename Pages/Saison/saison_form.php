@@ -1,3 +1,7 @@
+<?php
+session_start();
+require_once '../../include/csrf.php';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -6,6 +10,7 @@
   <title>Gestion des saisons</title>
   <meta name="description" content="Interface de gestion des saisons pour l'administration Holidaze.">
   <meta name="robots" content="noindex, nofollow">
+  <meta name="csrf-token" content="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
   <link rel="canonical" href="<?php
       $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
       echo $scheme . '://' . $_SERVER['HTTP_HOST'] . '/Pages/Saison/saison_form.php';
@@ -21,7 +26,8 @@
 
 
     <!-- Formulaire d'ajout -->
-    <form id="form-create" class="mb-6">
+    <form id="form-create" class="mb-6" method="POST">
+      <?= csrf_field() ?>
       <label class="block text-gray-700 mb-2">Nom de la saison :</label>
       <input type="text" id="libelle_saison" required
              class="w-full border rounded-lg p-2 mb-4 focus:ring focus:ring-blue-300">
@@ -52,6 +58,7 @@
 
   <script>
     let saisonEditId = null; // ID de la saison en édition
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
     async function loadSaisons(search = "") {
       try {
@@ -111,6 +118,7 @@
       const formData = new FormData();
       formData.append("id", id);
       formData.append("libelle_saison", libelle);
+      formData.append("_csrf_token", csrfToken);
 
       try {
         const res = await fetch("saison_traitement.php?action=update", { method: "POST", body: formData });
@@ -136,6 +144,7 @@
 
       const formData = new FormData();
       formData.append("libelle_saison", libelle);
+      formData.append("_csrf_token", csrfToken);
 
       try {
         const res = await fetch("saison_traitement.php?action=create", { method: "POST", body: formData });
@@ -166,6 +175,7 @@
       if (!confirm("Supprimer cette saison ?")) return;
       const formData = new FormData();
       formData.append("id", id);
+      formData.append("_csrf_token", csrfToken);
 
       try {
         const res = await fetch("saison_traitement.php?action=delete", { method: "POST", body: formData });

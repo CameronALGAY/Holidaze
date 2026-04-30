@@ -1,5 +1,6 @@
 <?php
 require_once '../../include/db.php';
+require_once '../../include/csrf.php';
 require_once 'bien_class.php';
 require_once '../Communes/communes_class.php';
 require_once '../TypeBien/typebien_class.php';
@@ -16,6 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: bien_form.php');
     exit;
 }
+
+csrf_verify();
 
 $action = $_POST['action'] ?? '';
 

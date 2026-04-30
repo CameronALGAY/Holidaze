@@ -8,6 +8,10 @@ header('Content-Type: application/json');
 
 try {
     require_once '../../include/db.php';
+    require_once '../../include/csrf.php';
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
     class SaisonController {
         private $pdo;
@@ -51,6 +55,10 @@ try {
 
     $controller = new SaisonController($pdo);
     $action = $_REQUEST['action'] ?? '';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        csrf_verify();
+    }
 
     switch ($action) {
         case 'getAll':
