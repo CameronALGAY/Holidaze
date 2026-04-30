@@ -1,47 +1,55 @@
 <?php
-header('Content-Type: application/json');
-require_once '../../includes/db.php';
-require_once '../Communes/communes_traitement.php';
+/**
+ * AJAX Communes — Holidaze
+ * CORRECTIONS :
+ *  - Chemin corrigé : __DIR__ . '/../include/db.php'  (plus ../../includes/)
+ *  - require communes_traitement.php avec chemin absolu correct
+ *  - header JSON dès le début (zéro HTML en réponse)
+ */
+header('Content-Type: application/json; charset=UTF-8');
+ini_set('display_errors', 0);
+
+require_once __DIR__ . '/../include/db.php';                                   // ✅ chemin correct
+require_once __DIR__ . '/../Pages/Communes/communes_traitement.php';           // ✅ chemin correct
 
 $controller = new CommunesController($pdo);
-$response = ['success' => false, 'message' => ''];
+$response   = ['success' => false, 'message' => ''];
 
 try {
-    // Gestion des requêtes GET
+    // --- GET ---
     if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $action = $_GET['action'] ?? '';
 
         switch ($action) {
             case 'getAll':
-                $communes = $controller->getAllCommunes();
-                $response = ['success' => true, 'data' => $communes];
+                $response = ['success' => true, 'data' => $controller->getAllCommunes()];
                 break;
 
             case 'getById':
-                $id = $_GET['id'] ?? 0;
-                $commune = $controller->getCommuneById($id);
+                $id      = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+                $commune = $id ? $controller->getCommuneById($id) : false;
                 $response = [
-                    'success' => $commune !== false,
-                    'data' => $commune,
-                    'message' => $commune ? '' : 'Commune non trouvée'
+                    'success' => (bool)$commune,
+                    'data'    => $commune ?: null,
+                    'message' => $commune ? '' : 'Commune non trouvée',
                 ];
                 break;
 
             case 'getByCodePostal':
-                $cp = $_GET['cp'] ?? '';
-                $communes = $controller->getByCodePostal($cp);
+                $cp       = trim($_GET['cp'] ?? '');
+                $communes = $cp ? $controller->getByCodePostal($cp) : [];
                 $response = ['success' => true, 'data' => $communes];
                 break;
 
             case 'getBiens':
-                $id = $_GET['id'] ?? 0;
-                $biens = $controller->getBiensByCommune($id);
+                $id    = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+                $biens = $id ? $controller->getBiensByCommune($id) : [];
                 $response = ['success' => true, 'data' => $biens];
                 break;
 
             case 'search':
-                $search = $_GET['search'] ?? '';
-                $communes = $controller->searchCommunes($search);
+                $search   = trim($_GET['search'] ?? '');
+                $communes = $search ? $controller->searchCommunes($search) : [];
                 $response = ['success' => true, 'data' => $communes];
                 break;
 
@@ -50,86 +58,70 @@ try {
         }
     }
 
-    // Gestion des requêtes POST
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // --- POST ---
+    elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
 
         switch ($action) {
             case 'create':
-                $nom_commune = $_POST['nom_commune'] ?? '';
-                $cp_commune = $_POST['cp_commune'] ?? '';
-                $gps_commune = $_POST['gps_commune'] ?? null;
-                
-                if (empty($nom_commune) || empty($cp_commune)) {
+                $nom = trim($_POST['nom_commune'] ?? '');
+                $cp  = trim($_POST['cp_commune']  ?? '');
+                $gps = $_POST['gps_commune'] ?? null;
+
+                if ($nom === '' || $cp === '') {
                     $response['message'] = 'Le nom et le code postal sont obligatoires';
                     break;
                 }
-
-                // Validation code postal
-                if (!preg_match('/^\d{5}$/', $cp_commune)) {
+                if (!preg_match('/^\d{5}$/', $cp)) {
                     $response['message'] = 'Le code postal doit contenir 5 chiffres';
                     break;
                 }
-
-                $result = $controller->createCommune($nom_commune, $cp_commune, $gps_commune);
-                $response = [
-                    'success' => $result,
-                    'message' => $result ? 'Commune créée avec succès' : 'Erreur lors de la création'
-                ];
+                $ok = $controller->createCommune($nom, $cp, $gps);
+                $response = ['success' => $ok, 'message' => $ok ? 'Commune créée' : 'Erreur création'];
                 break;
 
             case 'update':
-                $id = $_POST['id_commune'] ?? 0;
-                $nom_commune = $_POST['nom_commune'] ?? '';
-                $cp_commune = $_POST['cp_commune'] ?? '';
-                $gps_commune = $_POST['gps_commune'] ?? null;
+                $id  = filter_input(INPUT_POST, 'id_commune', FILTER_VALIDATE_INT);
+                $nom = trim($_POST['nom_commune'] ?? '');
+                $cp  = trim($_POST['cp_commune']  ?? '');
+                $gps = $_POST['gps_commune'] ?? null;
 
-                if (empty($nom_commune) || empty($cp_commune)) {
-                    $response['message'] = 'Le nom et le code postal sont obligatoires';
+                if (!$id || $nom === '' || $cp === '') {
+                    $response['message'] = 'Données invalides ou manquantes';
                     break;
                 }
-
-                // Validation code postal
-                if (!preg_match('/^\d{5}$/', $cp_commune)) {
+                if (!preg_match('/^\d{5}$/', $cp)) {
                     $response['message'] = 'Le code postal doit contenir 5 chiffres';
                     break;
                 }
-
-                $result = $controller->updateCommune($id, $nom_commune, $cp_commune, $gps_commune);
-                $response = [
-                    'success' => $result,
-                    'message' => $result ? 'Commune modifiée avec succès' : 'Erreur lors de la modification'
-                ];
+                $ok = $controller->updateCommune($id, $nom, $cp, $gps);
+                $response = ['success' => $ok, 'message' => $ok ? 'Commune modifiée' : 'Erreur modification'];
                 break;
 
             case 'delete':
-                $id = $_POST['id_commune'] ?? 0;
-                
-                // Vérifier si des biens sont liés
+                $id = filter_input(INPUT_POST, 'id_commune', FILTER_VALIDATE_INT);
+                if (!$id) { $response['message'] = 'ID invalide'; break; }
+
+                // Vérifier les biens liés avant suppression
                 $biens = $controller->getBiensByCommune($id);
-                if (count($biens) > 0) {
-                    $response['message'] = 'Impossible de supprimer: des biens sont rattachés à cette commune';
+                if (!empty($biens)) {
+                    $response['message'] = 'Impossible : des biens sont rattachés à cette commune';
                     break;
                 }
-
-                $result = $controller->deleteCommune($id);
-                $response = [
-                    'success' => $result,
-                    'message' => $result ? 'Commune supprimée avec succès' : 'Erreur lors de la suppression'
-                ];
+                $ok = $controller->deleteCommune($id);
+                $response = ['success' => $ok, 'message' => $ok ? 'Commune supprimée' : 'Erreur suppression'];
                 break;
 
             default:
                 $response['message'] = 'Action POST non reconnue';
         }
+    } else {
+        $response['message'] = 'Méthode non autorisée';
     }
 
 } catch (Exception $e) {
-    $response = [
-        'success' => false,
-        'message' => 'Erreur serveur: ' . $e->getMessage()
-    ];
+    error_log('ajax_commune error: ' . $e->getMessage());
+    $response = ['success' => false, 'message' => 'Erreur serveur'];
 }
 
 echo json_encode($response);
-?>
